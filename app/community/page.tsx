@@ -348,7 +348,7 @@ export default function CommunityPage() {
   };
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-950 min-h-screen font-sans text-brand-gray-dark dark:text-gray-200">
+    <div className="min-h-screen font-sans text-brand-gray-dark dark:text-gray-200">
       <Header
         theme={theme}
         toggleTheme={toggleTheme}

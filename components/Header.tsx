@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useTransition } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Theme } from '@/types';
-import { MenuIcon, XIcon, ChevronLeftIcon, ChevronRightIcon, SunIcon, MoonIcon, AdminIcon, InformationCircleIcon } from './Icons';
+import { AdminIcon, InformationCircleIcon } from './Icons';
 import { Map, Sparkles, Salad, Recycle, Users } from 'lucide-react';
 import UserButton from './UserButton';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
@@ -25,17 +25,28 @@ interface NavItemsProps {
   isAdmin?: boolean;
 }
 
+// Left side nav items
+const leftNavItems = [
+  { path: '/', label: 'Bản đồ', icon: Map },
+  { path: '/scan', label: 'AI', icon: Sparkles },
+];
+
+// Right side nav items
+const rightNavItems = [
+  { path: '/vegetarian', label: 'Thực đơn', icon: Salad },
+  { path: '/diy', label: 'Tái chế', icon: Recycle },
+];
+
 const NavItems: React.FC<NavItemsProps> = ({ currentPath, navigateTo, onLinkClick, isCollapsed = false, isAdmin = false }) => {
   const navGroups = [
     {
       title: "",
       items: [
-        { path: '/map', label: 'Bản đồ Xanh', icon: Map },
+        { path: '/', label: 'Bản đồ Xanh', icon: Map },
         { path: '/scan', label: 'Công cụ AI', icon: Sparkles },
         { path: '/vegetarian', label: 'Thực đơn xanh', icon: Salad },
         { path: '/diy', label: 'Đồ tái chế', icon: Recycle },
         { path: '/community', label: 'Cộng đồng', icon: Users },
-        { path: '/about', label: 'Về dự án', icon: InformationCircleIcon },
       ]
     },
   ];
@@ -63,24 +74,26 @@ const NavItems: React.FC<NavItemsProps> = ({ currentPath, navigateTo, onLinkClic
               const isActive = currentPath === item.path;
               const Icon = item.icon;
               return (
-                <div key={item.path} className="relative group">
+                <div key={item.path} className={`relative group sidebar-nav-item ${isActive ? 'active' : ''}`}>
                   <button
                     onClick={() => {
                       navigateTo(item.path);
                       if (onLinkClick) onLinkClick();
                     }}
-                    className={`w-full flex items-center text-left py-6 rounded-lg text-sm font-medium transition-colors ${isCollapsed ? 'px-2 justify-center' : 'px-6 mx-2 w-[calc(100%-16px)]'
+                    aria-label={item.label}
+                    className={`w-full flex items-center justify-center py-5 text-sm font-medium transition-all duration-200 ${isCollapsed ? 'px-4' : 'px-6 mx-2 w-[calc(100%-16px)]'
                       } ${isActive
-                        ? 'bg-brand-green/10 text-brand-green dark:bg-brand-green/20 dark:text-brand-green-light'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200'
+                        ? 'text-brand-green'
+                        : 'text-white/70 hover:text-white hover:scale-110'
                       }`}
                   >
-                    <Icon className={`flex-shrink-0 ${isCollapsed ? 'h-6 w-6' : 'h-5 w-5'}`} />
+                    <Icon className={`flex-shrink-0 transition-transform duration-200 ${isCollapsed ? 'h-7 w-7' : 'h-5 w-5'}`} />
                     {!isCollapsed && <span className="ml-3 whitespace-nowrap">{item.label}</span>}
                   </button>
                   {isCollapsed && (
-                    <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs px-2 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-[9999] shadow-lg">
-                      {item.label}
+                    <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-gray-900/95 backdrop-blur-sm text-white text-sm font-medium px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all duration-200 whitespace-nowrap pointer-events-none z-[9999] shadow-xl">
+                      <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-gray-900/95 rotate-45 rounded-sm"></div>
+                      <span className="relative">{item.label}</span>
                     </div>
                   )}
                 </div>
@@ -97,70 +110,99 @@ const NavItems: React.FC<NavItemsProps> = ({ currentPath, navigateTo, onLinkClic
 const Header: React.FC<HeaderProps> = ({ isCollapsed, setCollapsed, theme, toggleTheme }) => {
   const router = useRouter();
   const pathname = usePathname() || '/';
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const { isAdmin, loading } = useIsAdmin();
 
   console.log('Admin status:', { isAdmin, loading });
 
   const navigateTo = (path: string) => {
-    window.scrollTo(0, 0);
-    router.push(path);
+    startTransition(() => {
+      window.scrollTo(0, 0);
+      router.push(path);
+    });
   };
 
   return (
     <>
       {/* --- Sidebar for Desktop (Always Collapsed - Icon Only) --- */}
-      <aside className="bg-white dark:bg-brand-gray-dark border-r border-gray-200 dark:border-gray-700 h-screen fixed left-0 top-0 flex-col z-30 hidden md:flex transition-all duration-300 w-20 overflow-visible">
+      <aside className="bg-gradient-to-b from-brand-green to-brand-green-dark h-screen fixed left-0 top-0 flex-col z-30 hidden md:flex transition-all duration-300 w-24 overflow-visible pl-2.5">
         {/* Header with Logo */}
-        <div className="flex justify-center items-center border-b dark:border-gray-700 h-20 overflow-hidden px-2">
+        <div className="flex justify-center items-center h-24 pr-2 overflow-hidden">
           <div
-            className="flex items-center cursor-pointer"
-            onClick={() => navigateTo('/map')}
+            className="flex items-center cursor-pointer p-2 rounded-2xl bg-white/10 hover:bg-white/20 transition-all duration-200 hover:scale-105"
+            onClick={() => navigateTo('/')}
           >
-            <Image src={logo} alt="BandoXanh" width={40} height={40} className="rounded-xl" />
+            <Image src={logo} alt="BandoXanh" width={64} height={64} className="rounded-xl drop-shadow-lg" />
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-grow py-4 overflow-visible">
+        <nav className="flex-grow py-2 overflow-visible">
           <NavItems currentPath={pathname} navigateTo={navigateTo} isCollapsed={true} isAdmin={isAdmin} />
         </nav>
 
         {/* Footer with UserButton only */}
-        <div className="p-2 border-t dark:border-gray-700">
+        <div className="p-3 border-t border-white/10">
           <UserButton isCollapsed={true} />
         </div>
       </aside>
 
-      {/* --- Top Bar for Mobile --- */}
-      <header className="bg-white dark:bg-brand-gray-dark border-b border-gray-200 dark:border-gray-700 w-full fixed top-0 left-0 z-40 md:hidden h-20 flex items-center">
-        <div className="container mx-auto px-4 flex items-center justify-between w-full">
-          <div className="flex items-center cursor-pointer" onClick={() => navigateTo('/map')}>
-            <Image src={logo} alt="BandoXanh Logo" width={100} height={50} />
-          </div>
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white p-2 z-50">
-            {isMobileMenuOpen ? <XIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
-          </button>
-        </div>
-      </header>
+      {/* --- Bottom Navigation Bar for Mobile (App-style with Logo in center) --- */}
+      <nav className="fixed bottom-[10px] left-0 right-0 z-[9990] md:hidden safe-area-bottom">
+        {/* Background with curved notch for logo */}
+        <div className="relative">
+          <div className="absolute bottom-[10px] left-0 right-0 mx-auto rounded-full bg-white dark:bg-gray-900 w-[95%] h-[80px] z-[-1] shadow-lg shadow-brand-green/30"></div>          {/* Navigation items */}
+          <div className="flex items-center justify-around px-2 pt-2">
+            {/* Left items: AI and Menu */}
+            <button
+              onClick={() => navigateTo('/scan')}
+              className={`flex flex-col items-center justify-center py-3 px-3 transition-all duration-200 ${pathname === '/scan'
+                ? 'text-brand-green'
+                : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
+                }`}
+            >
+              <Sparkles className="h-6 w-6" />
+            </button>
 
-      {/* --- Mobile Menu Drawer --- */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 top-20 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
-          <nav
-            className="relative bg-white dark:bg-brand-gray-dark p-4 space-y-2 border-b border-gray-200 dark:border-gray-700 max-h-[calc(100vh-5rem)] overflow-y-auto"
-          >
-            <NavItems currentPath={pathname} navigateTo={navigateTo} onLinkClick={() => setIsMobileMenuOpen(false)} isCollapsed={false} isAdmin={isAdmin} />
-            <div className="pt-4 border-t dark:border-gray-700 space-y-2">
-              {/* User Profile in Mobile Menu - Inline Actions */}
-              <div className="pb-2">
-                <UserButton isCollapsed={false} showActionsInline={true} />
+            <button
+              onClick={() => navigateTo('/vegetarian')}
+              className={`flex flex-col items-center justify-center py-3 px-3 transition-all duration-200 ${pathname === '/vegetarian'
+                ? 'text-brand-green'
+                : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
+                }`}
+            >
+              <Salad className="h-6 w-6" />
+            </button>
+
+            {/* Center Logo Button (raised) */}
+            <div className="relative px-2">
+              <button
+                onClick={() => navigateTo('/')}
+                className="w-[100px] h-[100px] rounded-full bg-gradient-to-br from-brand-green to-brand-green-dark shadow-lg shadow-brand-green/30 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                <Image src={logo} alt="BandoXanh" width={80} height={80} className="rounded-full" />
+              </button>
+            </div>
+
+            {/* Right items: DIY and Account */}
+            <button
+              onClick={() => navigateTo('/diy')}
+              className={`flex flex-col items-center justify-center py-3 px-3 transition-all duration-200 ${pathname === '/diy'
+                ? 'text-brand-green'
+                : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
+                }`}
+            >
+              <Recycle className="h-6 w-6" />
+            </button>
+
+            <div className="flex flex-col items-center justify-center py-3 px-3">
+              <div className="flex items-center justify-center">
+                <UserButton isCollapsed={true} popupDirection="up" />
               </div>
             </div>
-          </nav>
+          </div>
         </div>
-      )}
+      </nav>
     </>
   );
 };

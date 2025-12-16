@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safe area for notched phones */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Base styles */
 * {
   margin: 0;
   padding: 0;
@@ -15,6 +25,18 @@ html {
 body {
   margin: 0;
   padding: 0;
+  /* Christmas snowflake cursor */
+  cursor: url("/cursor.png") 12 12, auto;
+}
+
+/* Christmas snowflake cursor for clickable elements */
+a,
+button,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+.cursor-pointer {
+  cursor: url("/pointer.png") 12 12, pointer;
 }
 
 /* Custom utility classes */
@@ -44,6 +66,23 @@ body {
   opacity: 0;
 }
 
+/* Slow bounce animation for Santa */
+@keyframes bounce-slow {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
 /* Map green tint */
 .leaflet-tile-pane {
   filter: hue-rotate(60deg) saturate(1.2) brightness(1.05);
@@ -57,4 +96,102 @@ body {
 
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* Snowfall effect */
+.snowfall-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+
+.snowflake {
+  position: absolute;
+  top: -10px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  animation: snowfall linear infinite;
+}
+
+@keyframes snowfall {
+  0% {
+    transform: translateY(-10px) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+
+  25% {
+    transform: translateY(25vh) translateX(10px) rotate(90deg);
+  }
+
+  50% {
+    transform: translateY(50vh) translateX(-10px) rotate(180deg);
+  }
+
+  75% {
+    transform: translateY(75vh) translateX(10px) rotate(270deg);
+  }
+
+  100% {
+    transform: translateY(100vh) translateX(-10px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Sidebar curved outward active item effect */
+.sidebar-nav-item {
+  position: relative;
+  z-index: 1;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-nav-item.active {
+  position: relative;
+  background: white;
+  border-radius: 20px 0 0 20px;
+  margin-right: 0;
+  box-shadow: inset 2px 0 8px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-nav-item.active::before,
+.sidebar-nav-item.active::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background: white;
+}
+
+.sidebar-nav-item.active::before {
+  top: -20px;
+  background:
+    radial-gradient(circle at 0 0, transparent 20px, white 20px);
+}
+
+.sidebar-nav-item.active::after {
+  bottom: -20px;
+  background:
+    radial-gradient(circle at 0 100%, transparent 20px, white 20px);
+}
+
+/* Dark mode - keep white active item for contrast on dark green */
+.dark .sidebar-nav-item.active {
+  background: white;
+}
+
+.dark .sidebar-nav-item.active::before {
+  background:
+    radial-gradient(circle at 0 0, transparent 20px, white 20px);
+}
+
+.dark .sidebar-nav-item.active::after {
+  background:
+    radial-gradient(circle at 0 100%, transparent 20px, white 20px);
 }

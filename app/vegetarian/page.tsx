@@ -149,10 +149,10 @@ export default function VegetarianMenuPage() {
     return (
         <>
             {/* Hero Section */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+            <div className="relative overflow-hidden bg-white dark:bg-gray-900">
                 {/* Decorative elements */}
-                <div className="absolute top-0 left-0 w-72 h-72 bg-green-200/50 dark:bg-green-900/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-emerald-200/50 dark:bg-emerald-900/20 rounded-full blur-3xl translate-x-1/4 translate-y-1/4" />
+                <div className="absolute top-0 left-0 w-72 h-72 bg-green-100/50 dark:bg-green-900/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-emerald-100/50 dark:bg-emerald-900/20 rounded-full blur-3xl translate-x-1/4 translate-y-1/4" />
 
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-24">
                     <div className="text-center max-w-3xl mx-auto">

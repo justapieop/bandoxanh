@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Header from '@/components/Header';
+import PageTransition from '@/components/PageTransition';
 import { useSidebar } from '@/hooks/useSidebar';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -14,7 +15,7 @@ interface MainLayoutProps {
 
 export default function MainLayout({
     children,
-    className = "bg-brand-gray-light dark:bg-black min-h-screen font-sans text-brand-gray-dark dark:text-gray-200",
+    className = "bg-white dark:bg-black min-h-screen font-sans text-brand-gray-dark dark:text-gray-200",
     mainClassName = "min-h-screen",
     isFullScreen = false,
 }: MainLayoutProps) {
@@ -29,12 +30,14 @@ export default function MainLayout({
                 isCollapsed={isSidebarCollapsed}
                 setCollapsed={setIsSidebarCollapsed}
             />
-            {/* Content wrapper with proper spacing for sidebar (desktop) and header (mobile) */}
+            {/* Content wrapper with proper spacing for sidebar (desktop) and bottom nav (mobile) */}
             <div
-                className={`transition-all duration-300 pt-20 md:pt-0 md:pl-20 ${isFullScreen ? 'h-screen' : ''}`}
+                className={`transition-all duration-300 pb-24 pl-0 md:pb-0 md:pl-24 ${isFullScreen ? 'h-screen pb-0' : ''}`}
             >
                 <main className={`${mainClassName} ${isFullScreen ? 'h-full w-full relative' : ''}`}>
-                    {children}
+                    <PageTransition>
+                        {children}
+                    </PageTransition>
                 </main>
             </div>
         </div>
