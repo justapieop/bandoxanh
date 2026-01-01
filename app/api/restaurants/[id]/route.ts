@@ -26,6 +26,7 @@ export async function PUT(
                 menu: body.menu,
                 priceRange: body.priceRange,
                 image: body.image,
+                isSponsored: body.isSponsored,
             },
         });
 

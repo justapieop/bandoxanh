@@ -109,6 +109,7 @@ export const useMapStore = create<MapState>((set, get) => ({
             ? s.wasteTypes.split(/,|;|"|\[|\]/).map((t: string) => t.trim().replace(/['"]/g, '')).filter((t: string) => t.length > 0)
             : s.wasteTypes || [],
           image: s.image,
+          isSponsored: s.isSponsored,
         }));
         setStations(transformedStations);
       }
@@ -137,6 +138,7 @@ export const useMapStore = create<MapState>((set, get) => ({
           organizer: e.organizer,
           description: e.description,
           image: e.imageUrl || e.image || '',
+          isSponsored: e.isSponsored,
         }));
         setEvents(transformedEvents);
       }
@@ -184,6 +186,7 @@ export const useMapStore = create<MapState>((set, get) => ({
           priceRange: i.priceRange,
           rating: i.rating,
           image: i.image,
+          isSponsored: i.isSponsored,
         })));
       }
     } catch (e) { console.error(e); }

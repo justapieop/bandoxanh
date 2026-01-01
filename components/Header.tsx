@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Theme } from '@/types';
 import { AdminIcon, InformationCircleIcon } from './Icons';
-import { Map, Sparkles, Salad, Recycle, Users } from 'lucide-react';
+import { Map, Sparkles, Salad, Recycle, Users, Newspaper } from 'lucide-react';
 import UserButton from './UserButton';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import Image from "next/image";
@@ -48,6 +48,7 @@ const NavItems: React.FC<NavItemsProps> = ({ currentPath, navigateTo, onLinkClic
         { path: '/vegetarian', label: 'Thực đơn xanh', icon: Salad },
         { path: '/diy', label: 'Đồ tái chế', icon: Recycle },
         { path: '/community', label: 'Cộng đồng', icon: Users },
+        { path: '/news', label: 'Tin tức & Sự kiện', icon: Newspaper },
       ]
     },
   ];
@@ -125,7 +126,7 @@ const Header: React.FC<HeaderProps> = ({ isCollapsed, setCollapsed, theme, toggl
   return (
     <>
       {/* --- Sidebar for Desktop (Always Collapsed - Icon Only) --- */}
-      <aside className="bg-gradient-to-b from-brand-green to-brand-green-dark h-screen fixed left-0 top-0 flex-col z-30 hidden md:flex transition-all duration-300 w-24 overflow-visible pl-2.5">
+      <aside className="bg-gradient-to-b from-brand-green to-brand-green-dark h-screen fixed left-0 top-0 flex-col z-[70] hidden md:flex transition-all duration-300 w-24 overflow-visible pl-2.5">
         {/* Header with Logo */}
         <div className="flex justify-center items-center h-24 pr-2 overflow-hidden">
           <div

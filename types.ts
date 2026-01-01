@@ -21,6 +21,7 @@ export interface Station {
   hours: string;
   wasteTypes: WasteType[];
   image: string;
+  isSponsored?: boolean;
 }
 
 export interface Award {
@@ -96,6 +97,7 @@ export interface RecyclingEvent {
   organizer: string;
   description: string;
   image: string;
+  isSponsored?: boolean;
 }
 
 export interface BikeRental {
@@ -111,6 +113,7 @@ export interface BikeRental {
   hours?: string;
   available?: number;
   instructions?: string;
+  isSponsored?: boolean;
 }
 
 export interface VegetarianRestaurant {
@@ -126,6 +129,7 @@ export interface VegetarianRestaurant {
   image: string;
   hours?: string;
   menu?: string;
+  isSponsored?: boolean;
 }
 
 export interface DonationPoint {
@@ -140,6 +144,7 @@ export interface DonationPoint {
   beneficiary: string;
   image: string;
   beneficiaryImage?: string | null;
+  isSponsored?: boolean;
 }
 
 export interface GptAnalysis {

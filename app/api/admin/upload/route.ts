@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkAdmin } from '@/lib/admin';
-import { supabaseAdmin } from '@/lib/supabase';
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
 
 export async function POST(request: NextRequest) {
   const adminCheck = await checkAdmin(request);
@@ -9,7 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    
+
     if (!file) {
       return NextResponse.json(
         { error: 'No file provided' },
@@ -38,37 +39,25 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `admin/${fileName}`;
 
-    console.log('Uploading file:', { fileName, filePath, size: file.size, type: file.type });
+    // Ensure upload directory exists
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'admin');
+    await mkdir(uploadDir, { recursive: true });
 
-    // Convert File to ArrayBuffer then to Buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const filePath = path.join(uploadDir, fileName);
 
-    // Upload to Supabase using admin client (bypasses RLS)
-    const { data, error } = await supabaseAdmin.storage
-      .from('bandoxanh-admin')
-      .upload(filePath, buffer, {
-        contentType: file.type,
-        upsert: false,
-        cacheControl: '3600',
-      });
+    console.log('Admin upload:', { fileName, filePath, size: file.size, type: file.type });
 
-    if (error) {
-      console.error('Supabase upload error:', error);
-      return NextResponse.json(
-        { error: `Upload failed: ${error.message}` },
-        { status: 500 }
-      );
-    }
+    // Convert file to buffer
+    const buffer = Buffer.from(await file.arrayBuffer());
 
-    console.log('Upload successful:', data);
+    // Write file to disk
+    await writeFile(filePath, buffer);
 
-    // Get public URL
-    const { data: { publicUrl } } = supabaseAdmin.storage
-      .from('bandoxanh-admin')
-      .getPublicUrl(filePath);
+    console.log('Upload successful:', filePath);
+
+    // Return public URL
+    const publicUrl = `/uploads/admin/${fileName}`;
 
     return NextResponse.json({
       success: true,

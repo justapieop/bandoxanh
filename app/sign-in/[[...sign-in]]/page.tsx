@@ -12,7 +12,7 @@ export default function SignInPage() {
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="text-center mb-8">
-          <div 
+          <div
             onClick={() => router.push('/')}
             className="flex items-center justify-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
           >
@@ -33,33 +33,33 @@ export default function SignInPage() {
                 formButtonPrimary: 'bg-brand-green hover:bg-brand-green-dark text-white font-semibold py-3 rounded-lg transition-all transform hover:scale-105 w-full',
                 card: 'bg-transparent shadow-none',
                 cardBox: 'shadow-none',
-                
+
                 // Input styling
                 formFieldInput: 'bg-gray-50 dark:bg-brand-gray-darker border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-brand-green focus:ring-2 focus:ring-brand-green/20',
                 formFieldLabel: 'text-gray-700 dark:text-gray-300 font-medium',
-                
+
                 // Link styling
                 formResendCodeLink: 'text-brand-green hover:text-brand-green-dark font-semibold',
                 footerActionLink: 'text-brand-green hover:text-brand-green-dark font-semibold',
-                
+
                 // Tab styling
                 tabButton: 'text-gray-600 dark:text-gray-400 hover:text-brand-green data-[active]:text-brand-green data-[active]:border-brand-green border-b-2 border-transparent',
-                
+
                 // Social button styling
                 socialButtonsBlockButton: 'border border-gray-300 dark:border-gray-600 hover:border-brand-green dark:hover:border-brand-green hover:bg-gray-50 dark:hover:bg-brand-gray-darker rounded-lg py-3',
-                
+
                 // Divider styling
                 dividerRow: 'text-gray-400 dark:text-gray-600',
-                
+
                 // Modal/Content
                 modalContent: 'bg-white dark:bg-brand-gray-dark',
-                
+
                 // Success messages
                 successMessage: 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20',
-                
+
                 // Error messages
                 alert: 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg',
-                
+
                 // Heading
                 headerTitle: 'text-2xl font-bold text-gray-900 dark:text-white',
                 headerSubtitle: 'text-gray-600 dark:text-gray-400',
@@ -69,7 +69,7 @@ export default function SignInPage() {
                 logoPlacement: 'none',
               },
             }}
-            redirectUrl="/map"
+            forceRedirectUrl="/"
           />
         </div>
 

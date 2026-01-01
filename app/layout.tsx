@@ -1,17 +1,29 @@
+import { Roboto } from 'next/font/google';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import Script from 'next/script';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import SnowfallWrapper from '@/components/SnowfallWrapper';
+import AdModal from '@/components/AdModal';
+import AdFooter from '@/components/AdFooter';
 import './globals.css';
+
+const roboto = Roboto({
+  weight: ['400', '500', '700', '900'],
+  subsets: ['vietnamese', 'latin'],
+  display: 'swap',
+  variable: '--font-roboto',
+});
 
 export const metadata: Metadata = {
   title: {
     default: 'BandoXanh - Nền tảng Tái chế & Bảo vệ Môi trường',
     template: '%s | BandoXanh'
   },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://bandoxanh.org'),
   description: 'BandoXanh - Nền tảng cộng đồng tái chế và bảo vệ môi trường tại Việt Nam. Tìm điểm thu gom rác thải, nhận diện phân loại rác, chia sẻ kinh nghiệm bảo vệ môi trường.',
   keywords: ['tái chế', 'môi trường', 'bảo vệ môi trường', 'phân loại rác', 'thu gom rác', 'cộng đồng xanh', 'Việt Nam', 'recycling', 'environment'],
   authors: [{ name: 'BandoXanh Team' }],
@@ -40,7 +52,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'vi_VN',
-    url: process.env.NEXT_PUBLIC_APP_URL || 'https://bandoxanh.com',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://bandoxanh.org',
     siteName: 'BandoXanh',
     title: 'BandoXanh - Nền tảng Tái chế & Bảo vệ Môi trường',
     description: 'Nền tảng cộng đồng tái chế và bảo vệ môi trường tại Việt Nam. Tìm điểm thu gom, nhận diện phân loại rác, chia sẻ kinh nghiệm xanh.',
@@ -86,7 +98,7 @@ export default function RootLayout({
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'BandoXanh',
-    url: 'https://bandoxanh.com',
+    url: 'https://bandoxanh.org',
     description: 'Nền tảng cộng đồng tái chế và bảo vệ môi trường tại Việt Nam',
     inLanguage: 'vi',
     publisher: {
@@ -94,12 +106,12 @@ export default function RootLayout({
       name: 'BandoXanh',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://bandoxanh.com/logo.png',
+        url: 'https://bandoxanh.org/logo.png',
       },
     },
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://bandoxanh.com/search?q={search_term_string}',
+      target: 'https://bandoxanh.org/search?q={search_term_string}',
       'query-input': 'required name=search_term_string',
     },
   };
@@ -111,27 +123,35 @@ export default function RootLayout({
           <meta charSet="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <meta name="theme-color" content="#22c55e" />
+          <meta name="google-adsense-account" content="ca-pub-3515314127366034" />
+          <Script
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3515314127366034"
+            crossOrigin="anonymous"
+            strategy="lazyOnload"
+          />
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           />
-          {/* Tailwind CDN removed - now using proper build with tree-shaking */}
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-          <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
-          <link
-            rel="stylesheet"
-            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-            crossOrigin=""
-          />
-          <script
-            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-            crossOrigin=""
-          ></script>
         </head>
-        <body>
+        <body className={roboto.className}>
+          {/* Google Analytics */}
+          <Script
+            src="https://www.googletagmanager.com/gtag/js?id=G-KTE37D7M2N"
+            strategy="lazyOnload"
+          />
+          <Script id="google-analytics" strategy="lazyOnload">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+
+              gtag('config', 'G-KTE37D7M2N');
+            `}
+          </Script>
+
+          <AdModal />
+          <AdFooter />
           <SnowfallWrapper />
           <Toaster
             position="top-right"
@@ -166,4 +186,3 @@ export default function RootLayout({
     </ClerkProvider>
   );
 }
-

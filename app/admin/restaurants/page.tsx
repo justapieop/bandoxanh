@@ -16,6 +16,7 @@ interface VegetarianRestaurant {
     menu: string;
     priceRange: string;
     image: string;
+    isSponsored: boolean;
 }
 
 export default function AdminRestaurantsPage() {
@@ -34,7 +35,8 @@ export default function AdminRestaurantsPage() {
         hours: '',
         menu: '',
         priceRange: '',
-        image: ''
+        image: '',
+        isSponsored: false
     });
 
     useEffect(() => {
@@ -317,6 +319,19 @@ export default function AdminRestaurantsPage() {
                                             onChange={(e) => setFormData({ ...formData, menu: e.target.value })}
                                             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                         />
+                                    </div>
+
+                                    <div className="col-span-2 flex items-center gap-2 pt-2">
+                                        <input
+                                            type="checkbox"
+                                            id="isSponsored"
+                                            checked={formData.isSponsored || false}
+                                            onChange={(e) => setFormData({ ...formData, isSponsored: e.target.checked })}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                        <label htmlFor="isSponsored" className="text-sm font-medium text-gray-700 select-none cursor-pointer">
+                                            Nhà tài trợ (Hiển thị lên đầu danh sách)
+                                        </label>
                                     </div>
                                 </div>
 

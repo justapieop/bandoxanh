@@ -3,13 +3,16 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
     try {
-        const restaurants = await prisma.vegetarianRestaurant.findMany();
+        const restaurants = await prisma.vegetarianRestaurant.findMany({
+            orderBy: [
+                { isSponsored: 'desc' },
+                { createdAt: 'desc' },
+            ],
+        });
         return NextResponse.json(restaurants);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch restaurants' }, { status: 500 });
     }
-
-
 }
 
 export async function POST(request: Request) {
@@ -25,6 +28,7 @@ export async function POST(request: Request) {
                 menu: body.menu,
                 priceRange: body.priceRange,
                 image: body.image,
+                isSponsored: body.isSponsored || false,
             },
         });
         return NextResponse.json(restaurant, { status: 201 });

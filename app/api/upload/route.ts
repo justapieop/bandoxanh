@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
 
 export async function POST(request: Request) {
   try {
@@ -19,8 +20,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate file size (max 10MB for community posts)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    // Validate file size (max 50MB for community posts)
+    const maxSize = 50 * 1024 * 1024; // 50MB
     if (file.size > maxSize) {
       return NextResponse.json(
         { error: 'File size too large. Maximum size is 10MB.' },
@@ -31,46 +32,28 @@ export async function POST(request: Request) {
     // Generate unique filename
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `community/${fileName}`;
-    const bucketName = 'bandoxanh';
+
+    // Ensure upload directory exists
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'community');
+    await mkdir(uploadDir, { recursive: true });
+
+    const filePath = path.join(uploadDir, fileName);
 
     console.log('Community upload:', { fileName, filePath, size: file.size, type: file.type });
 
     // Convert file to buffer
-    const buffer = await file.arrayBuffer();
+    const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Upload file using admin client (bypasses RLS)
-    const { data, error } = await supabaseAdmin.storage
-      .from(bucketName)
-      .upload(filePath, buffer, {
-        contentType: file.type,
-        cacheControl: '3600',
-        upsert: false,
-      });
+    // Write file to disk
+    await writeFile(filePath, buffer);
 
-    if (error) {
-      console.error('Upload error details:', {
-        message: error.message,
-        name: error.name,
-      });
-      return NextResponse.json(
-        { 
-          error: `Upload failed: ${error.message}`,
-          details: error.message
-        },
-        { status: 500 }
-      );
-    }
+    console.log('Upload successful:', filePath);
 
-    console.log('Upload successful:', data);
-
-    // Get public URL
-    const { data: publicUrlData } = supabaseAdmin.storage
-      .from(bucketName)
-      .getPublicUrl(filePath);
+    // Return public URL
+    const publicUrl = `/uploads/community/${fileName}`;
 
     return NextResponse.json({
-      url: publicUrlData?.publicUrl || '',
+      url: publicUrl,
       path: filePath,
     });
   } catch (error) {

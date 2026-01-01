@@ -345,6 +345,20 @@ export default function AdminPage() {
             </Link>
 
             <Link
+              href="/admin/ads"
+              className="group flex flex-col p-5 bg-fuchsia-50 rounded-xl border-2 border-fuchsia-100 hover:border-fuchsia-300 transition-all hover:-translate-y-1 hover:shadow-md"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-4xl">📢</span>
+                <span className="text-2xl text-fuchsia-600 group-hover:translate-x-1 transition-transform">→</span>
+              </div>
+              <div>
+                <div className="font-bold text-gray-900 text-lg">Quảng cáo</div>
+                <div className="text-sm text-gray-600">Quản lý banner & popup</div>
+              </div>
+            </Link>
+
+            <Link
               href="/admin/users"
               className="group flex flex-col p-5 bg-indigo-50 rounded-xl border-2 border-indigo-100 hover:border-indigo-300 transition-all hover:-translate-y-1 hover:shadow-md"
             >

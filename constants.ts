@@ -300,3 +300,16 @@ Hãy trang bị các thùng rác riêng biệt cho từng loại để việc ph
 5. Đèn trang trí: Kết hợp chai nhựa với đèn LED dây để tạo ra những chiếc đèn lồng độc đáo cho khu vườn hoặc ban công của bạn.`
   },
 ];
+
+export const ENV_QUOTES = [
+  "Trái đất không phải là của chúng ta, chúng ta mượn nó từ con cháu chúng ta.",
+  "Hãy sống xanh hôm nay vì một ngày mai tươi sáng.",
+  "Mỗi hành động nhỏ đều góp phần tạo nên sự thay đổi lớn.",
+  "Rác thải là tài nguyên chưa được đặt đúng chỗ.",
+  "Bảo vệ môi trường là bảo vệ chính cuộc sống của chúng ta.",
+  "Không có loại rác nào là vô dụng, chỉ có cách xử lý chưa phù hợp.",
+  "Thiên nhiên không cần chúng ta, chúng ta cần thiên nhiên.",
+  "Hãy giảm thiểu, tái sử dụng và tái chế bất cứ khi nào có thể.",
+  "Một cái cây hôm nay, một khu rừng ngày mai.",
+  "Sống xanh không khó, cái khó là bạn có muốn bắt đầu hay không."
+];

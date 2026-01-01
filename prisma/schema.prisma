@@ -69,6 +69,7 @@ model Station {
   hours      String
   wasteTypes String
   image      String
+  isSponsored Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -86,6 +87,7 @@ model RecyclingEvent {
   organizer     String
   description   String
   image         String
+  isSponsored   Boolean             @default(false)
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   registrations EventRegistration[]
@@ -292,6 +294,7 @@ model BikeRental {
   instructions String
   terms        String
   image        String
+  isSponsored  Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -308,6 +311,7 @@ model VegetarianRestaurant {
   menu        String
   priceRange  String
   image       String
+  isSponsored Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -324,6 +328,7 @@ model DonationPoint {
   acceptedItems    String
   beneficiary      String
   image            String
+  isSponsored      Boolean  @default(false)
   beneficiaryImage String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -360,5 +365,27 @@ model DiyIdea {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+
   @@map("diy_ideas")
+}
+
+enum AdPosition {
+  ALL
+  POPUP
+  FOOTER
+}
+
+model Ad {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  imageUrl    String
+  imageUrlHorizontal String?
+  linkUrl     String
+  position    AdPosition @default(ALL)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("ads")
 }

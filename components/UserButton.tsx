@@ -107,7 +107,7 @@ export default function UserButtonComponent({ isCollapsed = false, showActionsIn
 
             {/* Dropdown Menu for Collapsed Sidebar - Opens Upward */}
             {isDropdownOpen && (
-              <div className="absolute left-full ml-2 bottom-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+              <div className="absolute left-full ml-2 bottom-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-[60]">
                 <Link
                   href="/sign-in"
                   className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
