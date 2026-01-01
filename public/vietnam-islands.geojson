@@ -1,0 +1,110 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Đảo Hoàng Sa",
+                "name_en": "Pattle Island",
+                "type": "island"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    111.5583,
+                    16.5333
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Đảo Phú Lâm",
+                "name_en": "Woody Island",
+                "type": "island"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    112.3333,
+                    16.8333
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Đảo Trường Sa Lớn",
+                "name_en": "Spratly Island",
+                "type": "island"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    111.9183,
+                    8.6433
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Đảo Song Tử Tây",
+                "name_en": "Southwest Cay",
+                "type": "island"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    114.3283,
+                    11.4317
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Đảo Sinh Tồn",
+                "name_en": "Sin Cowe Island",
+                "type": "island"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    114.3283,
+                    9.8833
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Đảo Nam Yết",
+                "name_en": "Namyit Island",
+                "type": "island"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    114.3667,
+                    10.1833
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Đảo Sơn Ca",
+                "name_en": "Sand Cay",
+                "type": "island"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    114.4833,
+                    10.3833
+                ]
+            }
+        }
+    ]
+}

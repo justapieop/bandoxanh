@@ -50,16 +50,6 @@ export default function AdFooter() {
             } catch (error) {
                 console.error('Failed to fetch footer ads:', error);
             }
-
-            // Fallback: Default Shopee Ad
-            setActiveAd({
-                id: 'default-footer',
-                imageUrlHorizontal: 'https://placehold.co/1200x200?text=Shopee+Super+Sale', // Valid placeholder
-                linkUrl: 'https://s.shopee.vn/LgdOPjwDO',
-                title: 'Shopee Sale',
-                alt: 'Shopee Sale'
-            });
-            setIsVisible(true);
         };
 
         // Delay showing to avoid layout shift immediately on load

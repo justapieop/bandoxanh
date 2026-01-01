@@ -83,10 +83,7 @@ input[type="button"],
   animation: bounce-slow 2s ease-in-out infinite;
 }
 
-/* Map green tint */
-.leaflet-tile-pane {
-  filter: hue-rotate(60deg) saturate(1.2) brightness(1.05);
-}
+/* Map tiles - no filter, using VietMap original colors */
 
 /* Hide scrollbar utility */
 .hide-scrollbar {

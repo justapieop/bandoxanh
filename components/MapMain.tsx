@@ -5,9 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import { Station, WasteType, RecyclingEvent, BikeRental, VegetarianRestaurant, DonationPoint } from '@/types';
 import { MapPinIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon, CalendarIcon, HeartIcon } from '@/components/Icons';
 import { useMapStore } from '@/store/mapStore';
-import { Clock, Info, Recycle, Bike, Salad, Gift, LayoutGrid } from 'lucide-react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { Clock, Info, Recycle, Bike, Salad, Gift, LayoutGrid, Locate } from 'lucide-react';
+import '@vietmap/vietmap-gl-js/dist/vietmap-gl.css';
+// @ts-ignore
+import vietmapgl from '@vietmap/vietmap-gl-js/dist/vietmap-gl.js';
 
 // --- Type Guards using explicit 'type' field ---
 const isStation = (item: any): item is Station => item.type === 'station';
@@ -32,77 +33,13 @@ const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number): nu
     return d;
 };
 
-// --- Icons (matching filter icons) ---
-const CrownIcon = `<div class="absolute -top-3 -right-3 w-6 h-6 bg-yellow-400 rounded-full border-2 border-white flex items-center justify-center shadow-sm z-50"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 text-yellow-900"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" /></svg></div>`;
+// --- Constants ---
+const VIETMAP_API_KEY = 'd4f68feb171aa341c2c451b4719c8e0f215c4f0876a5b849';
+const CROWN_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 text-yellow-900"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" /></svg>`;
 
-// --- Icons (matching filter icons) ---
-const getStationIcon = (station: Station, isHovered: boolean = false) => {
-    const recycleSvg = `<path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/><path d="m14 16-3 3 3 3"/><path d="M8.293 13.596 7.196 9.5 3.1 10.598"/><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888L16.89 9.5"/><path d="m14.5 9.5 2.5-4.5"/><path d="m7 19 4-7"/><path d="M18.123 9.5H21l-1.939 3.401"/>`;
-    const colorClasses = 'text-green-600 bg-green-100';
-    const size = isHovered ? 48 : 40;
-    const iconSize = isHovered ? 24 : 20;
-    const isSponsored = station.isSponsored;
-    const html = `<div class="${colorClasses} ${isSponsored ? 'ring-4 ring-yellow-400 ring-offset-2' : ''} rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-200 relative" style="width: ${size}px; height: ${size}px; transform: ${isHovered ? 'scale(1.2)' : 'scale(1)'};">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: ${iconSize}px; height: ${iconSize}px;">${recycleSvg}</svg>
-        ${isSponsored ? CrownIcon : ''}
-    </div>`;
-    return L.divIcon({ html, className: '', iconSize: [size, size], iconAnchor: [size / 2, size], popupAnchor: [0, -size] });
-};
-
-const getEventIcon = (event: RecyclingEvent, isHovered: boolean = false) => {
-    const calendarSvg = `<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />`;
-    const colorClasses = 'text-purple-600 bg-purple-100';
-    const size = isHovered ? 48 : 40;
-    const iconSize = isHovered ? 24 : 20;
-    const isSponsored = event.isSponsored;
-    const html = `<div class="${colorClasses} ${isSponsored ? 'ring-4 ring-yellow-400 ring-offset-2' : ''} rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-200 relative" style="width: ${size}px; height: ${size}px; transform: ${isHovered ? 'scale(1.2)' : 'scale(1)'};">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: ${iconSize}px; height: ${iconSize}px;">${calendarSvg}</svg>
-        ${isSponsored ? CrownIcon : ''}
-    </div>`;
-    return L.divIcon({ html, className: '', iconSize: [size, size], iconAnchor: [size / 2, size], popupAnchor: [0, -size] });
-};
-
-const getBikeIcon = (bike: BikeRental, isHovered: boolean = false) => {
-    const bikeSvg = `<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>`;
-    const colorClasses = 'text-cyan-600 bg-cyan-100';
-    const size = isHovered ? 48 : 40;
-    const iconSize = isHovered ? 24 : 20;
-    const isSponsored = bike.isSponsored;
-    const html = `<div class="${colorClasses} ${isSponsored ? 'ring-4 ring-yellow-400 ring-offset-2' : ''} rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-200 relative" style="width: ${size}px; height: ${size}px; transform: ${isHovered ? 'scale(1.2)' : 'scale(1)'};">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: ${iconSize}px; height: ${iconSize}px;">${bikeSvg}</svg>
-        ${isSponsored ? CrownIcon : ''}
-    </div>`;
-    return L.divIcon({ html, className: '', iconSize: [size, size], iconAnchor: [size / 2, size], popupAnchor: [0, -size] });
-};
-
-const getRestaurantIcon = (rest: VegetarianRestaurant, isHovered: boolean = false) => {
-    const saladSvg = `<path d="M7 21h10"/><path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z"/><path d="M11.38 12a2.4 2.4 0 0 1-.4-4.77 2.4 2.4 0 0 1 3.2-2.77 2.4 2.4 0 0 1 3.47-.63 2.4 2.4 0 0 1 3.37 3.37 2.4 2.4 0 0 1-1.1 3.7 2.51 2.51 0 0 1 .03 1.1"/><path d="m13 12 4-4"/><path d="M10.9 7.25A3.99 3.99 0 0 0 4 10c0 .73.2 1.41.54 2"/>`;
-    const colorClasses = 'text-orange-600 bg-orange-100';
-    const size = isHovered ? 48 : 40;
-    const iconSize = isHovered ? 24 : 20;
-    const isSponsored = rest.isSponsored;
-    const html = `<div class="${colorClasses} ${isSponsored ? 'ring-4 ring-yellow-400 ring-offset-2' : ''} rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-200 relative" style="width: ${size}px; height: ${size}px; transform: ${isHovered ? 'scale(1.2)' : 'scale(1)'};">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: ${iconSize}px; height: ${iconSize}px;">${saladSvg}</svg>
-        ${isSponsored ? CrownIcon : ''}
-    </div>`;
-    return L.divIcon({ html, className: '', iconSize: [size, size], iconAnchor: [size / 2, size], popupAnchor: [0, -size] });
-};
-
-const getDonationIcon = (point: DonationPoint, isHovered: boolean = false) => {
-    const giftSvg = `<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>`;
-    const colorClasses = 'text-pink-600 bg-pink-100';
-    const size = isHovered ? 48 : 40;
-    const iconSize = isHovered ? 24 : 20;
-    const isSponsored = point.isSponsored;
-    const html = `<div class="${colorClasses} ${isSponsored ? 'ring-4 ring-yellow-400 ring-offset-2' : ''} rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-200 relative" style="width: ${size}px; height: ${size}px; transform: ${isHovered ? 'scale(1.2)' : 'scale(1)'};">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: ${iconSize}px; height: ${iconSize}px;">${giftSvg}</svg>
-        ${isSponsored ? CrownIcon : ''}
-    </div>`;
-    return L.divIcon({ html, className: '', iconSize: [size, size], iconAnchor: [size / 2, size], popupAnchor: [0, -size] });
-};
+// --- helper functions moved or removed ---
 
 
-// --- Map Component ---
 const MapComponent: React.FC<{
     items: ItemWithDistance[];
     hoveredItemId: string | null;
@@ -110,160 +47,230 @@ const MapComponent: React.FC<{
     focusedItem: ItemWithDistance | null;
 }> = ({ items, hoveredItemId, userLocation, focusedItem }) => {
     const mapRef = useRef<any>(null);
-    const itemMarkersRef = useRef<any>({});
-    const userMarkerRef = useRef<any>(null);
+    const mapContainerRef = useRef<HTMLDivElement>(null);
+    const markersRef = useRef<{ [key: string]: any }>({});
+    const [isStyleReady, setIsStyleReady] = useState(false);
+    const sourceId = 'locations';
 
     useEffect(() => {
-        if (mapRef.current) return;
-        const map = L.map('map-container').setView([21.0227, 105.8521], 13);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            className: 'green-map-tiles'
-        }).addTo(map);
+        if (mapRef.current || !mapContainerRef.current) return;
+
+        console.log('Initializing VietMap GL JS...');
+        // @ts-ignore
+        vietmapgl.accessToken = VIETMAP_API_KEY;
+
+        const map = new vietmapgl.Map({
+            container: mapContainerRef.current,
+            style: `https://maps.vietmap.vn/maps/styles/tm/style.json?apikey=${VIETMAP_API_KEY}`,
+            center: [105.8521, 21.0227],
+            zoom: 13,
+            maxBounds: [[102.14441, 6.5], [118.0, 23.5]],
+            minZoom: 5
+        });
+
+        map.on('load', () => {
+            console.log('VietMap style loaded');
+
+            // Minimalist style: hide POIs, buildings, etc.
+            const layers = map.getStyle().layers;
+            if (layers) {
+                layers.forEach((layer: any) => {
+                    const id = layer.id.toLowerCase();
+                    const isRoad = id.includes('transportation') || id.includes('road') || id.includes('motorway') || id.includes('highway');
+                    const isAdmin = id.includes('boundary') || id.includes('admin') || id.includes('country') || id.includes('province');
+                    const isBasemap = id.includes('water') || id.includes('land') || id.includes('background') || id === 'osm-liberty';
+
+                    if (!isRoad && !isAdmin && !isBasemap) {
+                        try {
+                            map.setLayoutProperty(layer.id, 'visibility', 'none');
+                        } catch (e) { }
+                    }
+                });
+            }
+
+            // Add source for data (clustering disabled)
+            map.addSource(sourceId, {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: []
+                },
+                cluster: false
+            });
+
+            setIsStyleReady(true);
+        });
+
         mapRef.current = map;
-        setTimeout(() => map.invalidateSize(), 100);
+        return () => {
+            if (mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+            }
+        };
     }, []);
 
+    // Update data when items change OR style becomes ready
     useEffect(() => {
-        const handleResize = () => mapRef.current?.invalidateSize();
-        window.addEventListener('resize', handleResize);
-        setTimeout(() => mapRef.current?.invalidateSize(), 250);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+        const map = mapRef.current;
+        if (!map || !isStyleReady) return;
 
-    const itemIds = items.map(i => `${i.type}-${i.id}`).join(',');
+        console.log(`Updating map with ${items.length} items. Style ready: ${isStyleReady}`);
 
+        const geojson: any = {
+            type: 'FeatureCollection',
+            features: items.map(item => ({
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: [item.lng, item.lat]
+                },
+                properties: {
+                    id: item.id,
+                    type: item.type,
+                    name: item.name,
+                    address: item.address,
+                    isSponsored: (item as any).isSponsored
+                }
+            }))
+        };
+
+        const source = map.getSource(sourceId) as any;
+        if (source) source.setData(geojson);
+
+        // Manage Markers
+        Object.values(markersRef.current).forEach(m => m.remove());
+        markersRef.current = {};
+
+        items.forEach(item => {
+            const el = document.createElement('div');
+            const isSponsored = (item as any).isSponsored;
+
+            let colorClasses = 'text-green-600 bg-green-100';
+            let svg = `<path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/><path d="m14 16-3 3 3 3"/><path d="M8.293 13.596 7.196 9.5 3.1 10.598"/><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888L16.89 9.5"/><path d="m14.5 9.5 2.5-4.5"/><path d="m7 19 4-7"/><path d="M18.123 9.5H21l-1.939 3.401"/>`;
+
+            if (item.type === 'event') {
+                colorClasses = 'text-purple-600 bg-purple-100';
+                svg = `<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />`;
+            } else if (item.type === 'bike') {
+                colorClasses = 'text-cyan-600 bg-cyan-100';
+                svg = `<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>`;
+            } else if (item.type === 'restaurant') {
+                colorClasses = 'text-orange-600 bg-orange-100';
+                svg = `<path d="M7 21h10"/><path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z"/><path d="M11.38 12a2.4 2.4 0 0 1-.4-4.77 2.4 2.4 0 0 1 3.2-2.77 2.4 2.4 0 0 1 3.47-.63 2.4 2.4 0 0 1 3.37 3.37 2.4 2.4 0 0 1-1.1 3.7 2.51 2.51 0 0 1 .03 1.1"/><path d="m13 12 4-4"/><path d="M10.9 7.25A3.99 3.99 0 0 0 4 10c0 .73.2 1.41.54 2"/>`;
+            } else if (item.type === 'donation') {
+                colorClasses = 'text-pink-600 bg-pink-100';
+                svg = `<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>`;
+            }
+
+            el.className = `marker-item marker-${item.type}-${item.id}`;
+            el.innerHTML = `<div class="${colorClasses} ${isSponsored ? 'ring-4 ring-yellow-400 ring-offset-2' : ''} rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-200 relative" style="width: 40px; height: 40px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">${svg}</svg>
+                ${isSponsored ? `<div class="absolute -top-2 -right-2 w-5 h-5 bg-yellow-400 rounded-full border-2 border-white flex items-center justify-center shadow-sm z-10">${CROWN_ICON_SVG}</div>` : ''}
+            </div>`;
+
+            const popup = new vietmapgl.Popup({ offset: 25, maxWidth: '320px' }).setHTML(`
+                <div class="w-full bg-white rounded-xl overflow-hidden font-sans border-0">
+                    <img src="${item.image || 'https://placehold.co/600x400/gray/white?text=' + encodeURIComponent(item.type || 'station')}" class="w-full h-40 object-cover rounded-t-xl" />
+                    <div class="p-4 space-y-2">
+                        <h3 class="font-bold text-base text-brand-green leading-tight">${item.name}</h3>
+                        <p class="text-sm text-gray-600 line-clamp-2">${item.address}</p>
+                        <hr class="border-gray-100 my-2" />
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.address)}" target="_blank" class="text-sm text-blue-600 font-bold flex items-center gap-1 hover:underline">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                            </svg>
+                            Chỉ đường
+                        </a>
+                    </div>
+                </div>
+            `);
+
+            const marker = new vietmapgl.Marker({ element: el })
+                .setLngLat([item.lng, item.lat])
+                .setPopup(popup)
+                .addTo(map);
+
+            markersRef.current[`${item.type}-${item.id}`] = marker;
+        });
+    }, [items, isStyleReady]);
+
+    // Handle Hover Highlighting
+    useEffect(() => {
+        Object.keys(markersRef.current).forEach(key => {
+            const marker = markersRef.current[key];
+            const el = marker.getElement();
+            if (key === hoveredItemId) {
+                el.style.transform = 'scale(1.2) translateY(-5px)';
+                el.style.zIndex = '1000';
+            } else {
+                el.style.transform = '';
+                el.style.zIndex = '';
+            }
+        });
+    }, [hoveredItemId]);
+
+    // Update markers based on hover/focus
     useEffect(() => {
         const map = mapRef.current;
         if (!map) return;
 
-        Object.values(itemMarkersRef.current).forEach((marker: any) => marker.remove());
-        itemMarkersRef.current = {};
-
-        items.forEach(item => {
-            let icon;
-            let popupContent = '';
-            const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.address)}`;
-            const directionsButton = `<div class="mt-3 pt-2 border-t border-gray-200"><a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 font-semibold text-sm hover:underline flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M21.71 11.29l-9-9a1 1 0 0 0-1.42 0l-9 9a1 1 0 0 0 0 1.42l9 9a1 1 0 0 0 1.42 0l9-9a1 1 0 0 0 0-1.42zM14 14.5V12h-4v3H8v-4c0-.6.4-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/></svg>Chỉ đường</a></div>`;
-
-            if (isStation(item)) {
-                icon = getStationIcon(item, false);
-                popupContent = `
-          <div class="w-64 bg-white rounded-xl shadow-md overflow-hidden font-sans">
-             <img src="${item.image || 'https://placehold.co/600x400/22c55e/white?text=Trạm+thu+gom'}" class="w-full h-32 object-cover" />
-             <div class="p-3 space-y-2 relative">
-               ${(item as any).isSponsored ? '<span class="absolute top-0 right-3 -translate-y-1/2 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-white">Tài trợ</span>' : ''}
-              <h3 class="font-bold text-sm text-green-700">${item.name}</h3>
-              <p class="text-xs text-gray-600">${item.address}</p>
-              <div class="flex flex-wrap gap-1">${item.wasteTypes.map(t => `<span class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] rounded-full">${t}</span>`).join('')}</div>
-              ${directionsButton}
-            </div>
-          </div>`;
-            } else if (isEvent(item)) {
-                icon = getEventIcon(item, false);
-                popupContent = `
-          <div class="w-64 bg-white rounded-xl shadow-md overflow-hidden font-sans">
-            <img src="${item.image || 'https://placehold.co/600x400/a855f7/white?text=Sự+kiện'}" class="w-full h-32 object-cover" />
-            <div class="p-3 space-y-2 relative">
-               ${(item as any).isSponsored ? '<span class="absolute top-0 right-3 -translate-y-1/2 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-white">Tài trợ</span>' : ''}
-               <h3 class="font-bold text-sm text-purple-700">${item.name}</h3>
-              <p class="text-xs text-gray-600">${item.address}</p>
-              <div class="text-xs text-gray-500"><p><strong>Thời gian:</strong> ${item.date} - ${item.time}</p></div>
-              ${directionsButton}
-            </div>
-          </div>`;
-            } else if (isBike(item)) {
-                icon = getBikeIcon(item, false);
-                popupContent = `
-          <div class="w-64 bg-white rounded-xl shadow-md overflow-hidden font-sans">
-             <img src="${item.image}" class="w-full h-32 object-cover" onError="this.src='https://placehold.co/600x400/06b6d4/white?text=Xe+đạp'" />
-             <div class="p-3 space-y-2 relative">
-               ${(item as any).isSponsored ? '<span class="absolute top-0 right-3 -translate-y-1/2 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-white">Tài trợ</span>' : ''}
-               <h3 class="font-bold text-sm text-cyan-700">${item.name}</h3>
-              <p class="text-xs text-gray-600">${item.address}</p>
-              <p class="text-xs font-bold text-cyan-600">${item.price}</p>
-              <p class="text-[10px] text-gray-500 line-clamp-2">${item.instructions}</p>
-              ${directionsButton}
-            </div>
-          </div>`;
-            } else if (isRestaurant(item)) {
-                icon = getRestaurantIcon(item, false);
-                popupContent = `
-          <div class="w-64 bg-white rounded-xl shadow-md overflow-hidden font-sans">
-            <img src="${item.image}" class="w-full h-32 object-cover" onError="this.src='https://placehold.co/600x400/ea580c/white?text=Nhà+hàng'" />
-            <div class="p-3 space-y-2 relative">
-               ${(item as any).isSponsored ? '<span class="absolute top-0 right-3 -translate-y-1/2 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-white">Tài trợ</span>' : ''}
-              <h3 class="font-bold text-sm text-orange-700">${item.name}</h3>
-              <p class="text-xs text-gray-600">${item.address}</p>
-              <p class="text-xs font-bold text-orange-600">${item.priceRange}</p>
-              <p class="text-[10px] text-gray-500 line-clamp-2">${item.menu}</p>
-              ${directionsButton}
-            </div>
-          </div>`;
-            } else if (isDonation(item)) {
-                icon = getDonationIcon(item, false);
-                popupContent = `
-          <div class="w-64 bg-white rounded-xl shadow-md overflow-hidden font-sans">
-             <img src="${item.image}" class="w-full h-32 object-cover" onError="this.src='https://placehold.co/600x400/db2777/white?text=Từ+thiện'" />
-             <div class="p-3 space-y-2 relative">
-               ${(item as any).isSponsored ? '<span class="absolute top-0 right-3 -translate-y-1/2 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-white">Tài trợ</span>' : ''}
-               <h3 class="font-bold text-sm text-pink-700">${item.name}</h3>
-              <p class="text-xs text-gray-600">${item.address}</p>
-              <p class="text-xs text-gray-500"><strong>Nhận:</strong> ${item.acceptedItems}</p>
-              <p class="text-xs text-gray-500"><strong>Cho:</strong> ${item.beneficiary}</p>
-              ${item.beneficiaryImage ? `<img src="${item.beneficiaryImage}" class="w-8 h-8 rounded-full float-right border border-gray-200" title="Người nhận" />` : ''}
-              ${directionsButton}
-            </div>
-          </div>`;
-            }
-
-            const markerKey = `${item.type}-${item.id}`;
-            const marker = L.marker([item.lat, item.lng], { icon }).addTo(map);
-            marker.bindPopup(popupContent);
-            itemMarkersRef.current[markerKey] = marker;
-        });
-    }, [itemIds]);
-
-    useEffect(() => {
-        const map = mapRef.current;
-        if (!map || !userLocation) return;
-        if (userMarkerRef.current) {
-            userMarkerRef.current.setLatLng([userLocation.lat, userLocation.lng]);
-        } else {
-            const userIcon = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] });
-            userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], { icon: userIcon }).addTo(map).bindPopup('Vị trí của bạn');
-            map.panTo([userLocation.lat, userLocation.lng]);
-        }
-    }, [userLocation]);
-
-    useEffect(() => {
-        Object.entries(itemMarkersRef.current).forEach(([markerKey, marker]: [string, any]) => {
-            const isHovered = markerKey === hoveredItemId;
-            const [type, idStr] = markerKey.split('-');
-            const itemId = parseInt(idStr, 10);
-            const item = items.find(s => s.id === itemId && s.type === type);
-            if (item) {
-                if (isStation(item)) marker.setIcon(getStationIcon(item, isHovered));
-                else if (isEvent(item)) marker.setIcon(getEventIcon(item, isHovered));
-                else if (isBike(item)) marker.setIcon(getBikeIcon(item, isHovered));
-                else if (isRestaurant(item)) marker.setIcon(getRestaurantIcon(item, isHovered));
-                else if (isDonation(item)) marker.setIcon(getDonationIcon(item, isHovered));
-
-                marker.setZIndexOffset(isHovered ? 1000 : 0);
-            }
-        });
-    }, [hoveredItemId, items]);
-
-    useEffect(() => {
-        const markerKey = focusedItem ? `${focusedItem.type}-${focusedItem.id}` : null;
-        if (focusedItem && mapRef.current && markerKey && itemMarkersRef.current[markerKey]) {
-            const marker = itemMarkersRef.current[markerKey];
-            mapRef.current.flyTo([focusedItem.lat, focusedItem.lng], 15, { animate: true, duration: 1 });
-            marker.openPopup();
+        if (focusedItem) {
+            map.flyTo({
+                center: [focusedItem.lng, focusedItem.lat],
+                zoom: 16,
+                essential: true
+            });
+            const marker = markersRef.current[`${focusedItem.type}-${focusedItem.id}`];
+            if (marker) marker.togglePopup();
         }
     }, [focusedItem]);
 
-    return <div id="map-container" className="w-full h-full" />;
+    const userMarkerRef = useRef<any>(null);
+
+    useEffect(() => {
+        if (userLocation && mapRef.current) {
+            if (!userMarkerRef.current) {
+                const el = document.createElement('div');
+                el.innerHTML = `<div class="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg animate-pulse"></div>`;
+                userMarkerRef.current = new vietmapgl.Marker(el)
+                    .setLngLat([userLocation.lng, userLocation.lat])
+                    .setPopup(new vietmapgl.Popup().setHTML('Vị trí của bạn'))
+                    .addTo(mapRef.current);
+            } else {
+                userMarkerRef.current.setLngLat([userLocation.lng, userLocation.lat]);
+            }
+            mapRef.current.flyTo({ center: [userLocation.lng, userLocation.lat], zoom: 14 });
+        }
+    }, [userLocation]);
+
+    const handleLocateUser = () => {
+        if (userLocation && mapRef.current) {
+            mapRef.current.flyTo({ center: [userLocation.lng, userLocation.lat], zoom: 16 });
+        } else {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const { latitude, longitude } = pos.coords;
+                    if (mapRef.current) mapRef.current.flyTo({ center: [longitude, latitude], zoom: 16 });
+                },
+                (err) => alert('Không thể lấy vị trí của bạn.')
+            );
+        }
+    };
+
+    return (
+        <div className="relative w-full h-full">
+            <div ref={mapContainerRef} className="w-full h-full" />
+            <button
+                onClick={handleLocateUser}
+                className="absolute bottom-6 right-6 z-20 bg-white p-3 rounded-full shadow-lg border-2 border-gray-100 text-gray-600 hover:text-brand-green transition-all"
+                title="Vị trí của tôi"
+            >
+                <Locate className="w-6 h-6" />
+            </button>
+        </div>
+    );
 };
 
 // --- Info Card ---
@@ -293,7 +300,7 @@ const InfoCard = ({ item, onClick }: { item: ItemWithDistance, onClick: () => vo
                             Tài trợ
                         </div>
                     )}
-                    {item.distance && <span className="text-[10px] md:text-xs font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full whitespace-nowrap">{item.distance.toFixed(1)} km</span>}
+                    {item.distance !== null && <span className="text-[10px] md:text-xs font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full whitespace-nowrap">{item.distance.toFixed(1)} km</span>}
                 </div>
             </div>
 
@@ -313,15 +320,29 @@ const InfoCard = ({ item, onClick }: { item: ItemWithDistance, onClick: () => vo
 // --- Main Map Content ---
 const MapMain = () => {
     const searchParams = useSearchParams();
-    const MAX_DISTANCE = 20;
     const [searchTerm, setSearchTerm] = useState('');
+
+    // --- Debounce Hook implementation ---
+    const useDebounce = (value: string, delay: number) => {
+        const [debouncedValue, setDebouncedValue] = useState(value);
+        useEffect(() => {
+            const handler = setTimeout(() => {
+                setDebouncedValue(value);
+            }, delay);
+            return () => {
+                clearTimeout(handler);
+            };
+        }, [value, delay]);
+        return debouncedValue;
+    };
+
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(true);
     const [focusedItem, setFocusedItem] = useState<ItemWithDistance | null>(null);
-
     const [viewMode, setViewMode] = useState<'all' | 'stations' | 'events' | 'bikes' | 'food' | 'donation'>('all');
-    const [distanceFilter, setDistanceFilter] = useState<number>(MAX_DISTANCE);
 
     const { stations, events, bikes, restaurants, donationPoints, loading, fetchStations, fetchEvents, fetchBikes, fetchRestaurants, fetchDonationPoints } = useMapStore();
 
@@ -355,23 +376,22 @@ const MapMain = () => {
         }));
     }, [viewMode, userLocation, stations, events, bikes, restaurants, donationPoints]);
 
-    const filteredItems = useMemo(() => {
+    // Use debouncedSearchTerm for filtering
+    const sidebarItems = useMemo(() => {
         return itemsWithDistance
             .filter((item) => {
-                const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    item.address.toLowerCase().includes(searchTerm.toLowerCase());
-                const matchesDistance = item.distance === null || item.distance <= distanceFilter;
-                return matchesSearch && matchesDistance;
+                const matchesSearch = item.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                    item.address.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+                return matchesSearch;
             })
             .sort((a, b) => {
-                // Priority to sponsored items
                 if ((a as any).isSponsored && !(b as any).isSponsored) return -1;
                 if (!(a as any).isSponsored && (b as any).isSponsored) return 1;
-                // Then by distance
                 return (a.distance || 999) - (b.distance || 999);
             });
-    }, [itemsWithDistance, searchTerm, distanceFilter]);
+    }, [itemsWithDistance, debouncedSearchTerm]);
 
+    // ... (categories array remains same) ...
     const categories = [
         { id: 'all', label: 'Tất cả', icon: <LayoutGrid className="w-6 h-6" />, activeClass: 'bg-gray-800 text-white', inactiveClass: 'bg-gray-100 text-gray-400' },
         { id: 'stations', label: 'Trạm rác', icon: <Recycle className="w-6 h-6" />, activeClass: 'bg-green-600 text-white', inactiveClass: 'bg-green-50 text-green-600' },
@@ -383,13 +403,14 @@ const MapMain = () => {
 
     return (
         <div className="flex flex-col md:flex-row h-full w-full relative overflow-hidden">
+            {/* ... Sidebar remains mostly same, just update MapComponent props if needed ... */}
             <div className={`
-          absolute inset-x-0 bottom-0 top-auto h-[90vh] md:h-full md:static md:w-[400px] 
-          bg-white border-t md:border-t-0 md:border-r border-gray-200 
-          z-50 flex flex-col transition-all duration-300 ease-in-out shadow-2xl md:shadow-none
-          rounded-t-3xl md:rounded-none flex-shrink-0
-          ${isPanelOpen ? 'translate-y-0 md:ml-0' : 'translate-y-[calc(100%-200px)] md:-ml-[400px] md:translate-y-0'}
-      `}>
+           absolute inset-x-0 bottom-0 top-auto h-[90vh] md:h-full md:static md:w-[400px] 
+           bg-white border-t md:border-t-0 md:border-r border-gray-200 
+           z-50 flex flex-col transition-all duration-300 ease-in-out shadow-2xl md:shadow-none
+           rounded-t-3xl md:rounded-none flex-shrink-0
+           ${isPanelOpen ? 'translate-y-0 md:ml-0' : 'translate-y-[calc(100%-200px)] md:-ml-[400px] md:translate-y-0'}
+       `}>
 
                 <div
                     className="md:hidden w-full flex justify-center pt-3 pb-1 cursor-pointer"
@@ -427,23 +448,6 @@ const MapMain = () => {
                             </button>
                         ))}
                     </div>
-
-                    {userLocation && (
-                        <div className="mt-4 md:mt-6">
-                            <div className="flex justify-between text-xs md:text-sm font-bold text-gray-500 mb-1.5 md:mb-2">
-                                <span>Bán kính</span>
-                                <span className="text-brand-green">{distanceFilter} km</span>
-                            </div>
-                            <input
-                                type="range"
-                                min="1"
-                                max="50"
-                                value={distanceFilter}
-                                onChange={(e) => setDistanceFilter(Number(e.target.value))}
-                                className="w-full h-1.5 md:h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-green"
-                            />
-                        </div>
-                    )}
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-2 md:p-4 bg-gray-50/30">
@@ -464,10 +468,10 @@ const MapMain = () => {
                     ) : (
                         <>
                             <p className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 md:mb-4 px-1 md:px-2">
-                                {filteredItems.length} địa điểm
+                                {sidebarItems.length} địa điểm
                             </p>
                             <div className="space-y-2 md:space-y-4 pb-20 md:pb-0">
-                                {filteredItems.map(item => (
+                                {sidebarItems.map(item => (
                                     <div key={`${item.type}-${item.id}`} onMouseEnter={() => setHoveredItemId(`${item.type}-${item.id}`)} onMouseLeave={() => setHoveredItemId(null)}>
                                         <InfoCard item={item} onClick={() => {
                                             setFocusedItem(item);
@@ -490,7 +494,7 @@ const MapMain = () => {
 
             <div className="flex-grow h-full relative z-10 w-full transition-all duration-300 ease-in-out">
                 <MapComponent
-                    items={filteredItems}
+                    items={sidebarItems}
                     hoveredItemId={hoveredItemId}
                     userLocation={userLocation}
                     focusedItem={focusedItem}
