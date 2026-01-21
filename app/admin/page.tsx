@@ -22,6 +22,7 @@ interface Stats {
   donations: number;
   bikes: number;
   diy: number;
+  challenges: number;
 }
 
 export default function AdminPage() {
@@ -42,6 +43,7 @@ export default function AdminPage() {
     donations: 0,
     bikes: 0,
     diy: 0,
+    challenges: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -68,12 +70,13 @@ export default function AdminPage() {
           fetch('/api/donations'),
           fetch('/api/bikes'),
           fetch('/api/admin/diy'),
+          fetch('/api/challenges'),
         ]);
 
         const [
           stations, events, news, posts,
           dishes, restaurants, donations, bikes,
-          diy
+          diy, challenges
         ] = await Promise.all([
           stationsRes.json(),
           eventsRes.json(),
@@ -84,6 +87,7 @@ export default function AdminPage() {
           donationsRes.json(),
           bikesRes.json(),
           diyRes.json(),
+          challengesRes.json(),
         ]);
 
         // Calculate additional stats from posts data
@@ -111,6 +115,7 @@ export default function AdminPage() {
           donations: Array.isArray(donations) ? donations.length : 0,
           bikes: Array.isArray(bikes) ? bikes.length : 0,
           diy: Array.isArray(diy) ? diy.length : 0,
+          challenges: Array.isArray(challenges) ? challenges.length : 0,
         });
       } catch (error) {
         console.error('Error fetching stats:', error);
@@ -369,6 +374,19 @@ export default function AdminPage() {
               <div>
                 <div className="font-bold text-gray-900 text-lg">Người dùng</div>
                 <div className="text-sm text-gray-600">Quản lý admin & người dùng</div>
+              </div>
+            </Link>
+            <Link
+              href="/admin/challenges"
+              className="group flex flex-col p-5 bg-cyan-50 rounded-xl border-2 border-cyan-100 hover:border-cyan-300 transition-all hover:-translate-y-1 hover:shadow-md"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-4xl">🏆</span>
+                <span className="bg-cyan-200 text-cyan-800 text-xs font-bold px-2 py-1 rounded-full">{stats.challenges} thử thách</span>
+              </div>
+              <div>
+                <div className="font-bold text-gray-900 text-lg">Thử thách</div>
+                <div className="text-sm text-gray-600">Quản lý thử thách sống xanh</div>
               </div>
             </Link>
           </div>

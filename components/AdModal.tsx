@@ -14,18 +14,8 @@ interface AdConfig {
 
 // Configuration: Add your ads here
 const ADS: AdConfig[] = [
-    {
-        id: 'shopee-affiliate-1',
-        title: 'Siêu Sale Shopee',
-        description: 'Săn sale cực sốc giảm đến 50%',
-        imageUrl: 'https://placehold.co/600x800?text=Shopee+Sale', // Placeholder, user should replace
-        linkUrl: 'https://s.shopee.vn/LgdOPjwDO',
-        alt: 'Shopee Sale',
-    },
     // Add more ads here
 ];
-
-
 
 export default function AdModal() {
     const [isOpen, setIsOpen] = useState(false);
@@ -60,7 +50,7 @@ export default function AdModal() {
                 console.error('Failed to fetch ads:', error);
             }
 
-            // Fallback to static ads
+            // Fallback to static ads if any exist
             if (ADS.length > 0) {
                 const randomAd = ADS[Math.floor(Math.random() * ADS.length)];
                 setActiveAd(randomAd);

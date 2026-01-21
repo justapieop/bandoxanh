@@ -34,6 +34,7 @@ model User {
   plan               String              @default("FREE")
   aiUsageCount       Int                 @default(0)
   lastUsageReset     DateTime?
+  challenges         UserChallenge[]
 
   @@map("users")
 }
@@ -388,4 +389,48 @@ model Ad {
   updatedAt   DateTime @updatedAt
 
   @@map("ads")
+}
+
+model Challenge {
+  id           Int             @id @default(autoincrement())
+  title        String
+  description  String
+  instructions String
+  image        String
+  duration     Int             @default(30)
+  points       Int             @default(0)
+  level        Int             @default(1)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  users        UserChallenge[]
+
+  @@map("challenges")
+}
+
+model UserChallenge {
+  id          Int            @id @default(autoincrement())
+  userId      Int
+  challengeId Int
+  status      String         @default("JOINED")
+  progress    Int            @default(0)
+  startDate   DateTime       @default(now())
+  completedAt DateTime?
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge   Challenge      @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  logs        ChallengeLog[]
+
+  @@unique([userId, challengeId])
+  @@map("user_challenges")
+}
+
+model ChallengeLog {
+  id              Int           @id @default(autoincrement())
+  userChallengeId Int
+  day             Int
+  imageUrl        String
+  comment         String?
+  createdAt       DateTime      @default(now())
+  userChallenge   UserChallenge @relation(fields: [userChallengeId], references: [id], onDelete: Cascade)
+
+  @@map("challenge_logs")
 }

@@ -17,9 +17,7 @@ export default function HomePage() {
       isFullScreen={true}
     >
       <div className="h-full w-full overflow-hidden">
-        <Suspense fallback={<MapLoading />}>
-          <MapMain />
-        </Suspense>
+        <MapMain />
       </div>
     </MainLayout>
   );

@@ -152,8 +152,21 @@ const Header: React.FC<HeaderProps> = ({ isCollapsed, setCollapsed, theme, toggl
       <nav className="fixed bottom-[10px] left-0 right-0 z-[9990] md:hidden safe-area-bottom">
         {/* Background with curved notch for logo */}
         <div className="relative">
-          <div className="absolute bottom-[10px] left-0 right-0 mx-auto rounded-full bg-white dark:bg-gray-900 w-[95%] h-[80px] z-[-1] shadow-lg shadow-brand-green/30"></div>          {/* Navigation items */}
-          <div className="flex items-center justify-around px-2 pt-2">
+          <div className="absolute left-0 right-0 mx-auto rounded-full bg-white dark:bg-gray-900 w-[95%] h-[80px] z-[-1] shadow-lg shadow-brand-green/30"></div>          {/* Navigation items */}
+          <div className="flex items-center justify-around px-2">
+            {/* Left items: AI and Menu */}
+            <Link
+              href="/"
+              prefetch={true}
+              className={`flex flex-col items-center justify-center py-3 px-3 transition-all duration-200 ${pathname === '/'
+                ? 'text-brand-green'
+                : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
+                }`}
+            >
+              <Map className="h-6 w-6" />
+            </Link>
+
+
             {/* Left items: AI and Menu */}
             <Link
               href="/scan"
@@ -167,6 +180,17 @@ const Header: React.FC<HeaderProps> = ({ isCollapsed, setCollapsed, theme, toggl
             </Link>
 
             <Link
+              href="/community"
+              prefetch={true}
+              className={`flex flex-col items-center justify-center py-3 px-3 transition-all duration-200 ${pathname === '/community'
+                ? 'text-brand-green'
+                : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
+                }`}
+            >
+              <Users className="h-6 w-6" />
+            </Link>
+
+            <Link
               href="/vegetarian"
               prefetch={true}
               className={`flex flex-col items-center justify-center py-3 px-3 transition-all duration-200 ${pathname === '/vegetarian'
@@ -177,18 +201,6 @@ const Header: React.FC<HeaderProps> = ({ isCollapsed, setCollapsed, theme, toggl
               <Salad className="h-6 w-6" />
             </Link>
 
-            {/* Center Logo Button (raised) */}
-            <div className="relative px-2">
-              <Link
-                href="/"
-                prefetch={true}
-                className="w-[100px] h-[100px] rounded-full bg-gradient-to-br from-brand-green to-brand-green-dark shadow-lg shadow-brand-green/30 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
-              >
-                <Image src={logo} alt="BandoXanh" width={80} height={80} className="rounded-full" />
-              </Link>
-            </div>
-
-            {/* Right items: DIY and Account */}
             <Link
               href="/diy"
               prefetch={true}

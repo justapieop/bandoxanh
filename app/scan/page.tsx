@@ -280,31 +280,21 @@ function AITool({ tab }: { tab: typeof tabs[number] }) {
                                     </h3>
                                     <p className="text-gray-600 dark:text-gray-400 text-sm">
                                         {error.isGuest
-                                            ? 'Đăng ký tài khoản miễn phí để có thêm 2 lượt mỗi ngày, hoặc nâng cấp PRO để có 100 lượt!'
-                                            : 'Nâng cấp lên gói Chiến Binh để có 100 lượt phân tích mỗi ngày và nhiều quyền lợi khác!'}
+                                            ? 'Đăng ký tài khoản miễn phí để tiếp tục khám phá bản đồ và tham gia cộng đồng!'
+                                            : 'Vui lòng quay lại vào ngày mai để tiếp tục sử dụng công cụ AI miễn phí.'}
                                     </p>
                                 </div>
                                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                                     {error.isGuest && (
                                         <Link
                                             href="/sign-up"
-                                            className="px-6 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                            className="px-6 py-3 bg-brand-green text-white font-bold rounded-xl shadow-lg hover:bg-green-600 transition-all flex items-center justify-center gap-2"
                                         >
                                             Đăng ký miễn phí
+                                            <ArrowRight className="w-4 h-4" />
                                         </Link>
                                     )}
-                                    <Link
-                                        href="/pricing"
-                                        className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold rounded-xl shadow-lg shadow-orange-200 dark:shadow-none hover:brightness-110 transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <Star className="w-5 h-5" />
-                                        Nâng cấp ngay
-                                        <ArrowRight className="w-4 h-4" />
-                                    </Link>
                                 </div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    Chỉ từ 99k/tháng • Hỗ trợ bảo vệ môi trường 🌱
-                                </p>
                             </>
                         ) : (
                             <>
@@ -477,8 +467,8 @@ function ResultDisplay({ result, tab, onReset }: { result: any; tab: typeof tabs
                                 <div className="flex items-start justify-between mb-2">
                                     <h4 className="text-lg font-bold text-gray-900 dark:text-white">{idea.title}</h4>
                                     <span className={`px-2 py-1 text-xs font-bold rounded-full ${idea.difficulty === 'Dễ' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                                            idea.difficulty === 'Trung bình' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                        idea.difficulty === 'Trung bình' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                            'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                         }`}>
                                         {idea.difficulty}
                                     </span>

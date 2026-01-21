@@ -54,3 +54,5 @@ Thumbs.db
 
 # Uploads
 public/uploads/
+map-hosting/
+*.sql

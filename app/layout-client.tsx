@@ -22,7 +22,7 @@ export function RootLayoutContent({ children }: LayoutProps) {
         isCollapsed={isSidebarCollapsed}
         setCollapsed={setIsSidebarCollapsed}
       />
-      <div className="min-h-screen pt-20 md:pt-0 transition-all duration-300 md:pl-20">
+      <div className="min-h-screen md:pt-0 transition-all duration-300 md:pl-20">
         {children}
       </div>
     </div>

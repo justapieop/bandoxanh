@@ -30,7 +30,7 @@ export default function News() {
         isCollapsed={isSidebarCollapsed}
         setCollapsed={setIsSidebarCollapsed}
       />
-      <div className="min-h-screen flex flex-col justify-between pt-20 md:pt-0 transition-all duration-300 md:pl-20">
+      <div className="min-h-screen flex flex-col justify-between md:pt-0 transition-all duration-300 md:pl-20">
         <main className="container mx-auto px-4 sm:px-6 py-8">
           <NewsPageComponent navigateTo={navigateTo} />
         </main>

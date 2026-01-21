@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         if (!usageCheck.allowed) {
             const message = isGuest
                 ? 'Bạn đã sử dụng hết lượt thử miễn phí (2 lần/ngày). Đăng nhập để có thêm lượt sử dụng!'
-                : 'Bạn đã đạt giới hạn sử dụng AI trong ngày. Vui lòng nâng cấp gói Pro để tiếp tục.';
+                : 'Bạn đã đạt giới hạn sử dụng AI trong ngày. Vui lòng quay lại vào ngày mai để tiếp tục.';
             return NextResponse.json(
                 { error: message, isLimitReached: true, isGuest },
                 { status: 403 }

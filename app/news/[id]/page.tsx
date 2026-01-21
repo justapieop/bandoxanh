@@ -118,7 +118,7 @@ function NewsDetailPage({ id }: { id: string }) {
         isCollapsed={isSidebarCollapsed}
         setCollapsed={setIsSidebarCollapsed}
       />
-      <div className="pt-20 md:pt-0 transition-all duration-300 md:pl-20">
+      <div className="md:pt-0 transition-all duration-300 md:pl-20">
         <main className="container mx-auto px-4 sm:px-6 py-10">
           <NewsDetailPageComponent articleId={articleId} navigateTo={navigateTo} />
         </main>

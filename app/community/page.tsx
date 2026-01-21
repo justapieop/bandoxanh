@@ -363,7 +363,7 @@ export default function CommunityPage() {
         isCollapsed={isSidebarCollapsed}
         setCollapsed={setSidebarCollapsed}
       />
-      <div className="min-h-screen pt-20 md:pt-0 transition-all duration-300 md:pl-20">
+      <div className="min-h-screen md:pt-0 transition-all duration-300 md:pl-20">
 
         <div className="max-w-2xl mx-auto px-4 py-8">
           <main className="space-y-6">

@@ -107,7 +107,7 @@ export default function UserButtonComponent({ isCollapsed = false, showActionsIn
 
             {/* Dropdown Menu for Collapsed Sidebar - Opens Upward */}
             {isDropdownOpen && (
-              <div className="absolute left-full ml-2 bottom-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-[60]">
+              <div className="absolute right-full bottom-full md:left-full ml-2 md:bottom-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-[60]">
                 <Link
                   href="/sign-in"
                   className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -155,11 +155,6 @@ export default function UserButtonComponent({ isCollapsed = false, showActionsIn
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                     {clerkUser.primaryEmailAddress?.emailAddress}
                   </p>
-                  <div className="mt-1">
-                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ${isPro ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}`}>
-                      {isPro ? 'PRO PLAN' : 'FREE PLAN'}
-                    </span>
-                  </div>
                 </div>
               )}
             </div>
@@ -175,13 +170,6 @@ export default function UserButtonComponent({ isCollapsed = false, showActionsIn
                   Xem hồ sơ
                 </button>
               )}
-              <Link
-                href="/pricing"
-                className="w-full text-left px-6 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm text-gray-900 dark:text-white flex items-center gap-3"
-              >
-                <CreditCardIcon className="w-5 h-5" />
-                Nâng cấp gói
-              </Link>
               <Link
                 href="/settings"
                 className="w-full text-left px-6 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm text-gray-900 dark:text-white flex items-center gap-3"
@@ -231,13 +219,6 @@ export default function UserButtonComponent({ isCollapsed = false, showActionsIn
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                     {clerkUser.primaryEmailAddress?.emailAddress}
                   </p>
-                  {!isCollapsed && (
-                    <div className="mt-0.5">
-                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ${isPro ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}`}>
-                        {isPro ? 'PRO' : 'FREE'}
-                      </span>
-                    </div>
-                  )}
                 </div>
               )}
             </button>
@@ -267,11 +248,6 @@ export default function UserButtonComponent({ isCollapsed = false, showActionsIn
                         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                           {clerkUser.primaryEmailAddress?.emailAddress}
                         </p>
-                        <div className="mt-1">
-                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ${isPro ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}`}>
-                            {isPro ? 'PRO MEMBER' : 'FREE MEMBER'}
-                          </span>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -288,14 +264,6 @@ export default function UserButtonComponent({ isCollapsed = false, showActionsIn
                       Xem hồ sơ
                     </button>
                   )}
-                  <Link
-                    href="/pricing"
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm text-gray-900 dark:text-white flex items-center gap-2"
-                    onClick={() => setIsDropdownOpen(false)}
-                  >
-                    <CreditCardIcon className="w-4 h-4" />
-                    Nâng cấp gói
-                  </Link>
                   <Link
                     href="/settings"
                     className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm text-gray-900 dark:text-white flex items-center gap-2"

@@ -10,6 +10,8 @@ import '@vietmap/vietmap-gl-js/dist/vietmap-gl.css';
 // @ts-ignore
 import vietmapgl from '@vietmap/vietmap-gl-js/dist/vietmap-gl.js';
 
+console.log('MapMain.tsx chunk loaded');
+
 // --- Type Guards using explicit 'type' field ---
 const isStation = (item: any): item is Station => item.type === 'station';
 const isEvent = (item: any): item is RecyclingEvent => item.type === 'event';
@@ -40,12 +42,15 @@ const CROWN_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 
 // --- helper functions moved or removed ---
 
 
-const MapComponent: React.FC<{
+interface MapComponentProps {
     items: ItemWithDistance[];
     hoveredItemId: string | null;
     userLocation: { lat: number; lng: number } | null;
     focusedItem: ItemWithDistance | null;
-}> = ({ items, hoveredItemId, userLocation, focusedItem }) => {
+}
+
+const MapComponent = React.memo((props: MapComponentProps) => {
+    const { items, hoveredItemId, userLocation, focusedItem } = props;
     const mapRef = useRef<any>(null);
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const markersRef = useRef<{ [key: string]: any }>({});
@@ -76,9 +81,20 @@ const MapComponent: React.FC<{
             if (layers) {
                 layers.forEach((layer: any) => {
                     const id = layer.id.toLowerCase();
-                    const isRoad = id.includes('transportation') || id.includes('road') || id.includes('motorway') || id.includes('highway');
+                    const isRoad = id.includes('road') || id.includes('motorway') || id.includes('highway') || id.includes('trunk') || id.includes('primary') || id.includes('secondary') || id.includes('tertiary') || id.includes('bridge') || id.includes('tunnel');
                     const isAdmin = id.includes('boundary') || id.includes('admin') || id.includes('country') || id.includes('province');
                     const isBasemap = id.includes('water') || id.includes('land') || id.includes('background') || id === 'osm-liberty';
+
+                    // Neutralize road colors
+                    if (isRoad) {
+                        try {
+                            if (id.includes('casing')) {
+                                map.setPaintProperty(layer.id, 'line-color', '#dddddd');
+                            } else {
+                                map.setPaintProperty(layer.id, 'line-color', '#ffffff');
+                            }
+                        } catch (e) { }
+                    }
 
                     if (!isRoad && !isAdmin && !isBasemap) {
                         try {
@@ -138,75 +154,91 @@ const MapComponent: React.FC<{
         const source = map.getSource(sourceId) as any;
         if (source) source.setData(geojson);
 
-        // Manage Markers
-        Object.values(markersRef.current).forEach(m => m.remove());
-        markersRef.current = {};
+        // --- Stable Marker Management ---
+        const newItemIds = new Set(items.map(item => `${item.type}-${item.id}`));
+        const currentMarkerIds = Object.keys(markersRef.current);
 
+        // 1. Remove markers no longer in list
+        currentMarkerIds.forEach(id => {
+            if (!newItemIds.has(id)) {
+                markersRef.current[id].remove();
+                delete markersRef.current[id];
+            }
+        });
+
+        // 2. Add or Update markers
         items.forEach(item => {
-            const el = document.createElement('div');
+            const id = `${item.type}-${item.id}`;
             const isSponsored = (item as any).isSponsored;
 
-            let colorClasses = 'text-green-600 bg-green-100';
-            let svg = `<path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/><path d="m14 16-3 3 3 3"/><path d="M8.293 13.596 7.196 9.5 3.1 10.598"/><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888L16.89 9.5"/><path d="m14.5 9.5 2.5-4.5"/><path d="m7 19 4-7"/><path d="M18.123 9.5H21l-1.939 3.401"/>`;
+            if (!markersRef.current[id]) {
+                // Create new marker
+                const el = document.createElement('div');
+                let colorClasses = 'text-green-600 bg-green-100';
+                let svg = `<path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/><path d="m14 16-3 3 3 3"/><path d="M8.293 13.596 7.196 9.5 3.1 10.598"/><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888L16.89 9.5"/><path d="m14.5 9.5 2.5-4.5"/><path d="m7 19 4-7"/><path d="M18.123 9.5H21l-1.939 3.401"/>`;
 
-            if (item.type === 'event') {
-                colorClasses = 'text-purple-600 bg-purple-100';
-                svg = `<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />`;
-            } else if (item.type === 'bike') {
-                colorClasses = 'text-cyan-600 bg-cyan-100';
-                svg = `<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>`;
-            } else if (item.type === 'restaurant') {
-                colorClasses = 'text-orange-600 bg-orange-100';
-                svg = `<path d="M7 21h10"/><path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z"/><path d="M11.38 12a2.4 2.4 0 0 1-.4-4.77 2.4 2.4 0 0 1 3.2-2.77 2.4 2.4 0 0 1 3.47-.63 2.4 2.4 0 0 1 3.37 3.37 2.4 2.4 0 0 1-1.1 3.7 2.51 2.51 0 0 1 .03 1.1"/><path d="m13 12 4-4"/><path d="M10.9 7.25A3.99 3.99 0 0 0 4 10c0 .73.2 1.41.54 2"/>`;
-            } else if (item.type === 'donation') {
-                colorClasses = 'text-pink-600 bg-pink-100';
-                svg = `<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>`;
-            }
+                if (item.type === 'event') {
+                    colorClasses = 'text-purple-600 bg-purple-100';
+                    svg = `<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />`;
+                } else if (item.type === 'bike') {
+                    colorClasses = 'text-cyan-600 bg-cyan-100';
+                    svg = `<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>`;
+                } else if (item.type === 'restaurant') {
+                    colorClasses = 'text-orange-600 bg-orange-100';
+                    svg = `<path d="M7 21h10"/><path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z"/><path d="M11.38 12a2.4 2.4 0 0 1-.4-4.77 2.4 2.4 0 0 1 3.2-2.77 2.4 2.4 0 0 1 3.47-.63 2.4 2.4 0 0 1 3.37 3.37 2.4 2.4 0 0 1-1.1 3.7 2.51 2.51 0 0 1 .03 1.1"/><path d="m13 12 4-4"/><path d="M10.9 7.25A3.99 3.99 0 0 0 4 10c0 .73.2 1.41.54 2"/>`;
+                } else if (item.type === 'donation') {
+                    colorClasses = 'text-pink-600 bg-pink-100';
+                    svg = `<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>`;
+                }
 
-            el.className = `marker-item marker-${item.type}-${item.id}`;
-            el.innerHTML = `<div class="${colorClasses} ${isSponsored ? 'ring-4 ring-yellow-400 ring-offset-2' : ''} rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-200 relative" style="width: 40px; height: 40px;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">${svg}</svg>
-                ${isSponsored ? `<div class="absolute -top-2 -right-2 w-5 h-5 bg-yellow-400 rounded-full border-2 border-white flex items-center justify-center shadow-sm z-10">${CROWN_ICON_SVG}</div>` : ''}
-            </div>`;
+                el.className = `marker-item marker-${item.type}-${item.id}`;
+                el.innerHTML = `<div class="${colorClasses} ${isSponsored ? 'ring-4 ring-yellow-400 ring-offset-2' : ''} rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-200 relative" style="width: 40px; height: 40px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">${svg}</svg>
+                    ${isSponsored ? `<div class="absolute -top-2 -right-2 w-5 h-5 bg-yellow-400 rounded-full border-2 border-white flex items-center justify-center shadow-sm z-10">${CROWN_ICON_SVG}</div>` : ''}
+                </div>`;
 
-            const popup = new vietmapgl.Popup({ offset: 25, maxWidth: '320px' }).setHTML(`
-                <div class="w-full bg-white rounded-xl overflow-hidden font-sans border-0">
-                    <img src="${item.image || 'https://placehold.co/600x400/gray/white?text=' + encodeURIComponent(item.type || 'station')}" class="w-full h-40 object-cover rounded-t-xl" />
-                    <div class="p-4 space-y-2">
-                        <h3 class="font-bold text-base text-brand-green leading-tight">${item.name}</h3>
-                        <p class="text-sm text-gray-600 line-clamp-2">${item.address}</p>
-                        <hr class="border-gray-100 my-2" />
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.address)}" target="_blank" class="text-sm text-blue-600 font-bold flex items-center gap-1 hover:underline">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                            </svg>
-                            Chỉ đường
-                        </a>
+                const popup = new vietmapgl.Popup({ offset: 25, maxWidth: '320px' }).setHTML(`
+                    <div class="w-full bg-white rounded-xl overflow-hidden font-sans border-0">
+                        <img src="${item.image || 'https://placehold.co/600x400/gray/white?text=' + encodeURIComponent(item.type || 'station')}" class="w-full h-40 object-cover rounded-t-xl" />
+                        <div class="p-4 space-y-2">
+                            <h3 class="font-bold text-base text-brand-green leading-tight">${item.name}</h3>
+                            <p class="text-sm text-gray-600 line-clamp-2">${item.address}</p>
+                            <hr class="border-gray-100 my-2" />
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.address)}" target="_blank" class="text-sm text-blue-600 font-bold flex items-center gap-1 hover:underline">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                </svg>
+                                Chỉ đường
+                            </a>
+                        </div>
                     </div>
-                </div>
-            `);
+                `);
 
-            const marker = new vietmapgl.Marker({ element: el })
-                .setLngLat([item.lng, item.lat])
-                .setPopup(popup)
-                .addTo(map);
+                const marker = new vietmapgl.Marker({ element: el })
+                    .setLngLat([item.lng, item.lat])
+                    .setPopup(popup)
+                    .addTo(map);
 
-            markersRef.current[`${item.type}-${item.id}`] = marker;
+                markersRef.current[id] = marker;
+            }
         });
     }, [items, isStyleReady]);
 
-    // Handle Hover Highlighting
     useEffect(() => {
         Object.keys(markersRef.current).forEach(key => {
             const marker = markersRef.current[key];
             const el = marker.getElement();
-            if (key === hoveredItemId) {
-                el.style.transform = 'scale(1.2) translateY(-5px)';
-                el.style.zIndex = '1000';
-            } else {
-                el.style.transform = '';
-                el.style.zIndex = '';
+            const inner = el.firstChild as HTMLElement;
+
+            if (inner) {
+                if (key === hoveredItemId) {
+                    inner.style.transform = 'scale(1.2) translateY(-10px)';
+                    el.style.zIndex = '1000';
+                } else {
+                    inner.style.transform = '';
+                    el.style.zIndex = '';
+                }
             }
         });
     }, [hoveredItemId]);
@@ -271,7 +303,7 @@ const MapComponent: React.FC<{
             </button>
         </div>
     );
-};
+});
 
 // --- Info Card ---
 const InfoCard = ({ item, onClick }: { item: ItemWithDistance, onClick: () => void }) => {
@@ -317,25 +349,25 @@ const InfoCard = ({ item, onClick }: { item: ItemWithDistance, onClick: () => vo
     )
 }
 
+// --- Debounce Hook implementation ---
+const useDebounce = (value: string, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+    return debouncedValue;
+};
+
 // --- Main Map Content ---
 const MapMain = () => {
+    console.log('MapMain mounting...');
     const searchParams = useSearchParams();
     const [searchTerm, setSearchTerm] = useState('');
-
-    // --- Debounce Hook implementation ---
-    const useDebounce = (value: string, delay: number) => {
-        const [debouncedValue, setDebouncedValue] = useState(value);
-        useEffect(() => {
-            const handler = setTimeout(() => {
-                setDebouncedValue(value);
-            }, delay);
-            return () => {
-                clearTimeout(handler);
-            };
-        }, [value, delay]);
-        return debouncedValue;
-    };
-
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -347,6 +379,7 @@ const MapMain = () => {
     const { stations, events, bikes, restaurants, donationPoints, loading, fetchStations, fetchEvents, fetchBikes, fetchRestaurants, fetchDonationPoints } = useMapStore();
 
     useEffect(() => {
+        console.log('Fetching map data...');
         fetchStations();
         fetchEvents();
         fetchBikes();
@@ -355,10 +388,12 @@ const MapMain = () => {
     }, []);
 
     useEffect(() => {
-        navigator.geolocation.getCurrentPosition(
-            (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-            (err) => console.error(err)
-        );
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                (err) => console.error('Geolocation error:', err)
+            );
+        }
     }, []);
 
     const itemsWithDistance = useMemo(() => {
@@ -376,22 +411,20 @@ const MapMain = () => {
         }));
     }, [viewMode, userLocation, stations, events, bikes, restaurants, donationPoints]);
 
-    // Use debouncedSearchTerm for filtering
     const sidebarItems = useMemo(() => {
         return itemsWithDistance
             .filter((item) => {
-                const matchesSearch = item.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                    item.address.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-                return matchesSearch;
+                const searchStr = (item.name + ' ' + item.address).toLowerCase();
+                return searchStr.includes(debouncedSearchTerm.toLowerCase());
             })
             .sort((a, b) => {
-                if ((a as any).isSponsored && !(b as any).isSponsored) return -1;
-                if (!(a as any).isSponsored && (b as any).isSponsored) return 1;
+                const as = (a as any).isSponsored ? 1 : 0;
+                const bs = (b as any).isSponsored ? 1 : 0;
+                if (as !== bs) return bs - as;
                 return (a.distance || 999) - (b.distance || 999);
             });
     }, [itemsWithDistance, debouncedSearchTerm]);
 
-    // ... (categories array remains same) ...
     const categories = [
         { id: 'all', label: 'Tất cả', icon: <LayoutGrid className="w-6 h-6" />, activeClass: 'bg-gray-800 text-white', inactiveClass: 'bg-gray-100 text-gray-400' },
         { id: 'stations', label: 'Trạm rác', icon: <Recycle className="w-6 h-6" />, activeClass: 'bg-green-600 text-white', inactiveClass: 'bg-green-50 text-green-600' },
@@ -403,19 +436,14 @@ const MapMain = () => {
 
     return (
         <div className="flex flex-col md:flex-row h-full w-full relative overflow-hidden">
-            {/* ... Sidebar remains mostly same, just update MapComponent props if needed ... */}
             <div className={`
-           absolute inset-x-0 bottom-0 top-auto h-[90vh] md:h-full md:static md:w-[400px] 
-           bg-white border-t md:border-t-0 md:border-r border-gray-200 
-           z-50 flex flex-col transition-all duration-300 ease-in-out shadow-2xl md:shadow-none
-           rounded-t-3xl md:rounded-none flex-shrink-0
-           ${isPanelOpen ? 'translate-y-0 md:ml-0' : 'translate-y-[calc(100%-200px)] md:-ml-[400px] md:translate-y-0'}
-       `}>
-
-                <div
-                    className="md:hidden w-full flex justify-center pt-3 pb-1 cursor-pointer"
-                    onClick={() => setIsPanelOpen(!isPanelOpen)}
-                >
+                absolute inset-x-0 bottom-0 top-auto h-[90vh] md:h-full md:static md:w-[400px] 
+                bg-white border-t md:border-t-0 md:border-r border-gray-200 
+                z-50 flex flex-col transition-all duration-300 ease-in-out shadow-2xl md:shadow-none
+                rounded-t-3xl md:rounded-none flex-shrink-0
+                ${isPanelOpen ? 'translate-y-0 md:ml-0' : 'translate-y-[calc(100%-200px)] md:-ml-[400px] md:translate-y-0'}
+            `}>
+                <div className="md:hidden w-full flex justify-center pt-3 pb-1 cursor-pointer" onClick={() => setIsPanelOpen(!isPanelOpen)}>
                     <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
                 </div>
 
@@ -438,10 +466,7 @@ const MapMain = () => {
                             <button
                                 key={cat.id}
                                 onClick={() => setViewMode(cat.id as any)}
-                                className={`
-                    flex flex-col items-center justify-center p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all touch-manipulation
-                    ${viewMode === cat.id ? cat.activeClass + ' shadow-lg scale-105' : cat.inactiveClass + ' hover:bg-gray-200'}
-                `}
+                                className={`flex flex-col items-center justify-center p-1.5 md:p-2.5 rounded-lg md:rounded-xl transition-all touch-manipulation ${viewMode === cat.id ? cat.activeClass + ' shadow-lg scale-105' : cat.inactiveClass + ' hover:bg-gray-200'}`}
                             >
                                 <div className="mb-0 md:mb-0.5 [&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-6 md:[&>svg]:h-6">{cat.icon}</div>
                                 <span className="text-[8px] md:text-[10px] font-bold hidden md:block">{cat.label}</span>
@@ -452,22 +477,14 @@ const MapMain = () => {
 
                 <div className="flex-1 overflow-y-auto p-2 md:p-4 bg-gray-50/30">
                     {loading ? (
-                        <div className="space-y-2 md:space-y-4">
-                            <p className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 md:mb-4 px-1 md:px-2 flex items-center gap-2">
-                                <span className="w-3 h-3 md:w-4 md:h-4 border-2 border-brand-green border-t-transparent rounded-full animate-spin"></span>
-                                Đang tải...
-                            </p>
-                            {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="p-3 md:p-4 rounded-2xl md:rounded-3xl border-2 border-gray-100 bg-white animate-pulse">
-                                    <div className="h-4 md:h-5 bg-gray-200 rounded w-3/4 mb-2 md:mb-3"></div>
-                                    <div className="h-3 md:h-4 bg-gray-100 rounded w-full mb-1.5 md:mb-2"></div>
-                                    <div className="h-2.5 md:h-3 bg-gray-100 rounded w-1/2"></div>
-                                </div>
+                        <div className="space-y-4 p-4">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="h-24 bg-gray-200 animate-pulse rounded-2xl" />
                             ))}
                         </div>
                     ) : (
                         <>
-                            <p className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 md:mb-4 px-1 md:px-2">
+                            <p className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 md:mb-4 px-2">
                                 {sidebarItems.length} địa điểm
                             </p>
                             <div className="space-y-2 md:space-y-4 pb-20 md:pb-0">
@@ -487,7 +504,7 @@ const MapMain = () => {
 
             <button
                 onClick={() => setIsPanelOpen(!isPanelOpen)}
-                className={`hidden md:flex absolute top-1/2 -translate-y-1/2 z-20 bg-white p-3 rounded-r-2xl shadow-xl border border-gray-100 text-gray-500 hover:text-brand-green hover:pl-4 transition-all duration-300 ease-in-out ${isPanelOpen ? 'left-[400px]' : 'left-0'}`}
+                className={`hidden md:flex absolute top-1/2 -translate-y-1/2 z-20 bg-white p-3 rounded-r-2xl shadow-xl border border-gray-100 text-gray-500 hover:text-brand-green transition-all duration-300 ${isPanelOpen ? 'left-[400px]' : 'left-0'}`}
             >
                 {isPanelOpen ? <ChevronDoubleLeftIcon className="w-6 h-6" /> : <ChevronDoubleRightIcon className="w-6 h-6" />}
             </button>

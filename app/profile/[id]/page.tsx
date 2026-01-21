@@ -20,6 +20,7 @@ import { useUserPosts } from '@/hooks/useUserPosts';
 import { useFollow } from '@/hooks/useFollow';
 import { useTheme } from '@/hooks/useTheme';
 import { useSidebar } from '@/hooks/useSidebar';
+import { useUserChallenges } from '@/hooks/useUserChallenges'; // Added hook
 import { formatDate, parseImages, getAvatarUrl } from '@/lib/utils/helpers';
 
 export default function ProfilePage() {
@@ -48,6 +49,7 @@ export default function ProfilePage() {
   const { profile, loading: profileLoading } = useProfile(userId);
   const { badges, addBadge } = useBadges(userId);
   const { posts: userPosts } = useUserPosts(userId);
+  const { challenges: userChallenges } = useUserChallenges(userId); // Use hook
   const { stats: followStats } = useFollow(Number(userId));
   const { theme, toggleTheme } = useTheme();
   const { isCollapsed: isSidebarCollapsed, setCollapsed: setIsSidebarCollapsed } = useSidebar();
@@ -71,7 +73,7 @@ export default function ProfilePage() {
           isCollapsed={isSidebarCollapsed}
           setCollapsed={setIsSidebarCollapsed}
         />
-        <div className="pt-20 md:pt-0 transition-all duration-300 md:pl-20">
+        <div className="md:pt-0 transition-all duration-300 md:pl-20">
           <div className="flex justify-center items-center min-h-[60vh] px-4">
             <div className="text-center max-w-md">
               <div className="w-20 h-20 bg-brand-green-light rounded-full flex items-center justify-center mx-auto mb-6">
@@ -137,7 +139,7 @@ export default function ProfilePage() {
           isCollapsed={isSidebarCollapsed}
           setCollapsed={setIsSidebarCollapsed}
         />
-        <div className="pt-20 md:pt-0 transition-all duration-300 md:pl-20">
+        <div className="md:pt-0 transition-all duration-300 md:pl-20">
           <div className="flex justify-center items-center min-h-[60vh]">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Không tìm thấy người dùng</h2>
@@ -165,7 +167,7 @@ export default function ProfilePage() {
       />
 
       <div
-        className="pt-24 md:pt-0 transition-all duration-300 md:pl-20"
+        className="md:pt-0 transition-all duration-300 md:pl-20"
       >
         <main className="container mx-auto px-4 max-w-3xl pb-20">
 
@@ -220,8 +222,8 @@ export default function ProfilePage() {
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Bài viết</p>
             </div>
             <div className="bg-white dark:bg-brand-gray-dark p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 text-center">
-              <p className="text-3xl font-black text-pink-500 mb-1">{userPosts.reduce((sum, post) => sum + (post.likes || 0), 0)}</p>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Thích</p>
+              <p className="text-3xl font-black text-pink-500 mb-1">{userChallenges?.length || 0}</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Thử thách</p>
             </div>
             <div
               onClick={() => setFollowersModal({ isOpen: true, type: 'followers' })}
@@ -236,6 +238,61 @@ export default function ProfilePage() {
             >
               <p className="text-3xl font-black text-purple-500 mb-1">{followStats.followingCount || 0}</p>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Đang theo</p>
+            </div>
+          </div>
+
+          {/* Challenges Section */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-6 px-2">
+              <div className="w-2 h-8 bg-yellow-500 rounded-full"></div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Thử thách đang tham gia</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {userChallenges?.map((uc) => (
+                <div key={uc.id} className="bg-white dark:bg-brand-gray-dark rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 flex gap-4">
+                  <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                    <img src={uc.challenge.image} alt={uc.challenge.title} className="object-cover w-full h-full" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-bold text-gray-900 dark:text-white line-clamp-1">{uc.challenge.title}</h3>
+                      {uc.status === 'COMPLETED' ? (
+                        <div className="flex gap-2">
+                          <span className="text-xs font-bold bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">Hoàn thành</span>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              const text = `Tôi đã hoàn thành thử thách "${uc.challenge.title}" trên BandoXanh! 🌱`;
+                              const url = window.location.href; // Or link to challenge detail
+                              window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`, '_blank');
+                            }}
+                            className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full hover:bg-blue-200 transition-colors"
+                          >
+                            Chia sẻ
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Đang thực hiện</span>
+                      )}            </div>
+
+                    <div className="mt-2">
+                      <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <span>Tiến độ</span>
+                        <span>{uc.progress}/{uc.challenge.duration} ngày</span>
+                      </div>
+                      <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
+                        <div className="bg-brand-green h-1.5 rounded-full" style={{ width: `${Math.round((uc.progress / uc.challenge.duration) * 100)}%` }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {userChallenges?.length === 0 && (
+                <div className="col-span-full text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                  <p className="text-gray-500">Người dùng chưa tham gia thử thách nào.</p>
+                </div>
+              )}
             </div>
           </div>
 
