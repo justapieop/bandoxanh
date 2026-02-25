@@ -53,6 +53,8 @@ export default function CommunityPage() {
     addPost,
     deletePost,
     updatePost,
+    addComment,
+    updateComment,
     setExplorePosts,
     setFollowingPosts,
     setExploreLoading,
@@ -305,6 +307,22 @@ export default function CommunityPage() {
         throw new Error(errorData.error || 'Failed to add comment');
       }
 
+      const savedComment = await response.json();
+
+      // Add comment to local state immediately
+      addComment(postId, savedComment.comment ?? {
+        id: savedComment.id || `temp-${Date.now()}`,
+        content: commentText,
+        createdAt: new Date().toISOString(),
+        authorId: user.id,
+        author: {
+          id: user.id,
+          name: user.fullName || user.firstName || 'Anonymous',
+          email: user.emailAddresses?.[0]?.emailAddress || '',
+          avatar: user.imageUrl || '',
+        },
+      });
+
       setCommentText('');
       setCommentingPostId(null);
       toast.success('Đã gửi bình luận');
@@ -332,6 +350,7 @@ export default function CommunityPage() {
 
       if (!response.ok) throw new Error('Failed to update comment');
 
+      updateComment(postId, commentId, editCommentContent);
       setEditingCommentId(null);
       toast.success('Cập nhật bình luận thành công');
     } catch (error) {
