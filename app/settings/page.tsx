@@ -5,7 +5,7 @@ import MainLayout from '@/components/MainLayout';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { UserCircle, Save, Camera, LogOut, Loader2 } from 'lucide-react';
+import { UserCircle, Save, Camera, LogOut, Loader2, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface UserData {
@@ -19,7 +19,7 @@ interface UserData {
 
 export default function SettingsPage() {
     const { user, isLoaded, isSignedIn } = useUser();
-    const { signOut } = useClerk();
+    const { signOut, openUserProfile } = useClerk();
     const router = useRouter();
 
     const [userData, setUserData] = useState<UserData | null>(null);
@@ -138,10 +138,14 @@ export default function SettingsPage() {
                                             </div>
                                         )}
                                     </div>
-                                    {/* Clerk manages avatar, so we link there or just show info */}
-                                    {/* <button type="button" className="absolute bottom-0 right-0 p-1.5 bg-brand-green text-white rounded-full shadow-md hover:bg-brand-green-dark transition-colors" title="Change Avatar">
-                    <Camera className="w-4 h-4" />
-                  </button> */}
+                                    <button
+                                        type="button"
+                                        onClick={() => openUserProfile()}
+                                        className="absolute bottom-0 right-0 p-1.5 bg-brand-green text-white rounded-full shadow-md hover:bg-brand-green-dark transition-colors"
+                                        title="Đổi ảnh đại diện"
+                                    >
+                                        <Camera className="w-4 h-4" />
+                                    </button>
                                 </div>
 
                                 <div className="flex-1 text-center sm:text-left">
@@ -152,6 +156,14 @@ export default function SettingsPage() {
                                     <p className="text-xs text-gray-400 dark:text-gray-500">
                                         ID: {userData?.id} • {userData?.isAdmin ? 'Admin' : 'Thành viên'}
                                     </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => openUserProfile()}
+                                        className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-brand-green hover:text-brand-green-dark transition-colors"
+                                    >
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                        Quản lý tài khoản (email, mật khẩu, ảnh đại diện)
+                                    </button>
                                 </div>
                             </div>
 
@@ -184,7 +196,10 @@ export default function SettingsPage() {
                                         disabled
                                         className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 cursor-not-allowed"
                                     />
-                                    <p className="text-xs text-gray-400 mt-1 pl-1">Email được quản lý bởi tài khoản đăng nhập.</p>
+                                    <p className="text-xs text-gray-400 mt-1 pl-1">
+                                        Email được quản lý bởi tài khoản đăng nhập.{' '}
+                                        <button type="button" onClick={() => openUserProfile()} className="text-brand-green hover:underline font-medium">Đổi email</button>
+                                    </p>
                                 </div>
 
                                 {/* Bio */}
