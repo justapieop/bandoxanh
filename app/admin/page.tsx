@@ -59,7 +59,7 @@ export default function AdminPage() {
         const [
           stationsRes, eventsRes, newsRes, postsRes,
           dishesRes, restaurantsRes, donationsRes, bikesRes,
-          diyRes
+          diyRes, challengesRes
         ] = await Promise.all([
           fetch('/api/stations'),
           fetch('/api/events'),

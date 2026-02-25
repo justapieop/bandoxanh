@@ -201,7 +201,7 @@ export default function ProfilePage() {
               <div className="mt-8 flex gap-4 w-full max-w-sm">
                 {isCurrentUser ? (
                   <button
-                    onClick={() => router.replace('/settings')}
+                    onClick={() => router.push("/settings")}
                     className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white font-bold hover:bg-gray-200 transition-colors"
                   >
                     Chỉnh sửa
