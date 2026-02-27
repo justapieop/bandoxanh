@@ -56,3 +56,4 @@ Thumbs.db
 public/uploads/
 map-hosting/
 *.sql
+next-env.d.ts
